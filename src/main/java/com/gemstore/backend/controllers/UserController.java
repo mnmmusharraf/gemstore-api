@@ -1,27 +1,26 @@
 package com.gemstore.backend.controllers;
 
-
-import com.gemstore.backend.dtos.UpdateProfileRequest;
-import com.gemstore.backend.dtos.UserResponse;
+import com.gemstore. backend.dtos.UpdateProfileRequest;
+import com.gemstore. backend.dtos.UserResponse;
 import com.gemstore.backend.entities.User;
 import com.gemstore.backend.mappers.UserMapper;
-import com.gemstore.backend.security.UserPrincipal;
-import com.gemstore.backend.services.UserService;
+import com. gemstore.backend.security.UserPrincipal;
+import com.gemstore.backend.services. UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * User resource operations.
  * Distinguish between:
  *   - /api/users/me  (self operations)
  *   - /api/users/{id} (admin / general lookup)
- *
- * Adjust security rules accordingly.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -52,15 +51,56 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toUserResponse(user));
     }
 
+    // ==================== /me ENDPOINTS ====================
+
     /**
-     * Partially update current user's profile (display name, names, avatar, locale, etc.).
+     * Get current authenticated user's profile.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        User user = userService.getById(principal.getId());
+        return ResponseEntity.ok(userMapper.toUserResponse(user));
+    }
+
+    /**
+     * Partially update current user's profile (PATCH).
      */
     @PatchMapping("/me")
-    public ResponseEntity<UserResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request,
-                                                      Authentication authentication) {
+    public ResponseEntity<UserResponse> patchProfile(
+            @Valid @RequestBody UpdateProfileRequest request,
+            Authentication authentication
+    ) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         User updated = userService.updateProfile(principal.getId(), request);
+        return ResponseEntity.ok(userMapper. toUserResponse(updated));
+    }
+
+    /**
+     * Full update current user's profile (PUT).
+     * Frontend can use either PATCH or PUT.
+     */
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateProfile(
+            @Valid @RequestBody UpdateProfileRequest request,
+            Authentication authentication
+    ) {
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        User updated = userService.updateProfile(principal. getId(), request);
         return ResponseEntity.ok(userMapper.toUserResponse(updated));
+    }
+
+    /**
+     * Upload/update current user's avatar.
+     */
+    @PostMapping("/me/avatar")
+    public ResponseEntity<Map<String, String>> uploadAvatar(
+            @RequestParam("avatar") MultipartFile file,
+            Authentication authentication
+    ) {
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        String avatarUrl = userService.uploadAvatar(principal.getId(), file);
+        return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
     }
 
     /**
@@ -72,6 +112,8 @@ public class UserController {
         userService.softDelete(principal.getId());
         return ResponseEntity.noContent().build();
     }
+
+    // ==================== ADMIN ENDPOINTS ====================
 
     /**
      * Hard delete a user by ID (admin-only action).

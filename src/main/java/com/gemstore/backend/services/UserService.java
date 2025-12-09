@@ -1,18 +1,20 @@
-package com.gemstore.backend.services;
+package com.gemstore. backend.services;
 
-
-import com.gemstore.backend.dtos.ChangePasswordRequest;
-import com.gemstore.backend.dtos.UpdateProfileRequest;
-import com.gemstore.backend.entities.User;
-import com.gemstore.backend.exceptions.UserNotFoundException;
-import com.gemstore.backend.mappers.UserMapper;
+import com. gemstore.backend.dtos. ChangePasswordRequest;
+import com. gemstore.backend.dtos. UpdateProfileRequest;
+import com. gemstore.backend.entities.User;
+import com.gemstore. backend.exceptions.UserNotFoundException;
+import com.gemstore.backend. mappers.UserMapper;
 import com.gemstore.backend.repositories.UserRepository;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import jakarta. validation.Valid;
+import lombok. RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +23,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService; // <-- ADD THIS
 
     /**
      * Returns all users, excluding soft-deleted ones.
-     * Controller will map these to UserResponse via UserMapper.
      */
     public List<User> findAll() {
         return userRepository.findAll()
@@ -45,23 +47,93 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    /**
+     * Find user by username.
+     */
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+    }
+
+    /**
+     * Find user by email.
+     */
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+    }
+
+    @Transactional
     public User updateProfile(Long id, UpdateProfileRequest req) {
         User user = getById(id);
         userMapper.updateUserFromProfile(req, user); // partial update mapping
         return userRepository.save(user);
     }
 
+    /**
+     * Upload and update user's avatar.
+     */
+    @Transactional
+    public String uploadAvatar(Long userId, MultipartFile file) {
+        User user = getById(userId);
+
+        // Validate file
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("File must be an image");
+        }
+
+        // Validate file size (max 5MB)
+        long maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("File size must be less than 5MB");
+        }
+
+        // Upload to storage (S3, local, etc.)
+        String avatarUrl = fileStorageService.uploadFile(file, "avatars/" + userId);
+
+        // Update user
+        user.setAvatarUrl(avatarUrl);
+        userRepository. save(user);
+
+        return avatarUrl;
+    }
+
+    /**
+     * Delete user's avatar.
+     */
+    @Transactional
+    public void deleteAvatar(Long userId) {
+        User user = getById(userId);
+
+        if (user.getAvatarUrl() != null) {
+            // Optionally delete from storage
+            // fileStorageService.deleteFile(user.getAvatarUrl());
+            user.setAvatarUrl(null);
+            userRepository.save(user);
+        }
+    }
+
+    @Transactional
     public void softDelete(Long id) {
         User user = getById(id);
         user.softDelete();
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteHard(Long id) {
-        if (!userRepository.existsById(id)) throw new UserNotFoundException(id);
-        userRepository.deleteById(id);
+        if (!userRepository. existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+        userRepository. deleteById(id);
     }
 
+    @Transactional
     public User updateStatus(Long id, String status) {
         User user = getById(id);
         user.setStatus(status.toUpperCase());
@@ -70,12 +142,8 @@ public class UserService {
 
     /**
      * Change the authenticated user's password.
-     * Rules:
-     * - If the user already has a local password, currentPassword must match.
-     * - New password must differ from the existing one.
-     * - Password is stored as a hash (never plaintext).
-     * - Resets login failures and updates passwordChangedAt for JWT invalidation strategies.
      */
+    @Transactional
     public void changePassword(Long id, @Valid ChangePasswordRequest request) {
         User user = getById(id);
 
@@ -88,7 +156,7 @@ public class UserService {
 
         // If user already has a local password, verify current password
         String existingHash = user.getPasswordHash();
-        if (existingHash != null && !existingHash.isBlank()) {
+        if (existingHash != null && !existingHash. isBlank()) {
             if (currentPassword == null || currentPassword.isBlank()) {
                 throw new IllegalArgumentException("Current password is required");
             }
@@ -96,32 +164,31 @@ public class UserService {
                 throw new IllegalArgumentException("Current password is incorrect");
             }
             // Prevent setting the same password again
-            if (passwordEncoder.matches(newPassword, existingHash)) {
+            if (passwordEncoder. matches(newPassword, existingHash)) {
                 throw new IllegalArgumentException("New password must be different from the current password");
             }
         }
 
         // Set/replace password hash
         user.setPasswordHash(passwordEncoder.encode(newPassword));
-        user.markPasswordChanged();   // updates passwordChangedAt
-        user.resetLoginFailures();    // clear lock/failures if any
+        user.markPasswordChanged();
+        user.resetLoginFailures();
 
         userRepository.save(user);
     }
 
+    @Transactional
     public User updateRole(Long id, String role) {
         if (role == null || role.isBlank()) {
             throw new IllegalArgumentException("Role must not be blank");
         }
 
-        // Normalize: accept "admin", "ADMIN", "ROLE_ADMIN"
         String normalized = role.trim().toUpperCase();
-        if (normalized.startsWith("ROLE_")) {
+        if (normalized. startsWith("ROLE_")) {
             normalized = normalized.substring(5);
         }
 
-        // Whitelist allowed roles. Extend as needed (e.g., MODERATOR).
-        java.util.Set<String> allowed = java.util.Set.of("USER", "ADMIN");
+        Set<String> allowed = Set.of("USER", "ADMIN");
         if (!allowed.contains(normalized)) {
             throw new IllegalArgumentException("Unsupported role: " + role + ". Allowed: " + allowed);
         }
@@ -131,8 +198,8 @@ public class UserService {
             throw new IllegalStateException("Cannot change role for a deleted account");
         }
 
-        if (normalized.equals(user.getRole())) {
-            return user; // no change
+        if (normalized.equals(user. getRole())) {
+            return user;
         }
 
         user.setRole(normalized);
