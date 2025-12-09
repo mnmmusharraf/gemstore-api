@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/login/oauth2/**", "/oauth2/**").permitAll()
                         // Permit static resources if needed (optional)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )

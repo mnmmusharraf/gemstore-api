@@ -104,6 +104,16 @@ public class UserController {
     }
 
     /**
+     * Delete current user's avatar.
+     */
+    @DeleteMapping("/me/avatar")
+    public ResponseEntity<Void> deleteAvatar(Authentication authentication) {
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        userService.deleteAvatar(principal.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * Soft delete (deactivate) the current user's account.
      */
     @DeleteMapping("/me")
