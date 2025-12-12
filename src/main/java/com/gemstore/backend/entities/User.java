@@ -108,6 +108,33 @@ public class User {
     @Column(length = 16)
     private String locale;
 
+    // ========== NEW PROFILE FIELDS ==========
+
+    @Column(length = 500)
+    private String website;
+
+    @Column(columnDefinition = "TEXT")
+    private  String bio;
+
+    @Column(name = "is_private", nullable = false)
+    @Builder.Default
+    private boolean privateProfile = false;
+
+    // ========== SOCIAL STATS (denormalized) ==========
+    @Column(name = "posts_count", nullable = false)
+    @Builder.Default
+    private Integer postsCount = 0;
+
+    @Column(name = "followers_count", nullable = false)
+    @Builder.Default
+    private Integer followersCount = 0;
+
+    @Column(name = "following_count", nullable = false)
+    @Builder.Default
+    private Integer followingCount = 0;
+
+
+
     // ---------- Lifecycle Hooks (if not using Spring Data JPA auditing) ----------
 
     @PrePersist

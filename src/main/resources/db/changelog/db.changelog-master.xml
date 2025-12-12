@@ -23,4 +23,60 @@
         <sqlFile path="V3__trg_users_updated_at.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <!-- 4. Add profile-related columns -->
+    <changeSet id="20251114162740-4" author="mnm-musharraf">
+        <sqlFile path="V4__add_profile_related_columns_to_users_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 5. Add posts tables -->
+    <changeSet id="20251114162740-5" author="mnm-musharraf">
+        <sqlFile path="V5__add_posts_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 6. Add posts images tables -->
+    <changeSet id="20251114162740-6" author="mnm-musharraf">
+        <sqlFile path="V6__add_posts_images_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 7. Add followers table -->
+    <changeSet id="20251114162740-7" author="mnm-musharraf">
+        <sqlFile path="V7__add_followers_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 8. Add likes tables -->
+    <changeSet id="20251114162740-8" author="mnm-musharraf">
+        <sqlFile path="V8__add_likes_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 9. Add messages tables -->
+    <changeSet id="20251114162740-9" author="mnm-musharraf">
+        <sqlFile path="V9__add_messages_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 10. Add reports tables -->
+    <changeSet id="20251114162740-10" author="mnm-musharraf">
+        <sqlFile path="V10__add_reports_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 11. Add trgs to update posts count  -->
+    <changeSet id="20251114162740-11" author="mnm-musharraf">
+        <sqlFile path="V11__add_triggers_to_update_posts_count.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+                 endDelimiter="$$"/>
+    </changeSet>
+
+    <!-- 12. Add trgs posts tables -->
+    <changeSet id="20251114162740-12" author="mnm-musharraf">
+        <sqlFile path="V12__add_trgs_posts_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 13. trgs to update followers count  -->
+    <changeSet id="20251114162740-13" author="mnm-musharraf">
+        <sqlFile path="V13__trgs_update_fllws_count.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+                 endDelimiter="$$"/>
+    </changeSet>
+
 </databaseChangeLog>

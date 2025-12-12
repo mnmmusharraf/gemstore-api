@@ -26,4 +26,13 @@ public class UpdateProfileRequest {
 
     @Size(max = 16)
     private String locale;
+
+    // New profile fields
+    @Size(max = 500)
+    private String website;
+
+    @Size(max = 2000)
+    private String bio;
+
+    private Boolean privateProfile;
 }

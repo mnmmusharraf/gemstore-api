@@ -1,6 +1,7 @@
 package com.gemstore.backend.dtos;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,4 +23,16 @@ public class UserResponse {
     private Instant updatedAt;
     private String timezone;
     private String locale;
+
+    // New profile fields
+    private String website;
+    private String bio;
+
+    @JsonProperty("privateProfile")
+    private Boolean privateProfile;
+
+    // Social stats
+    private Integer postsCount;
+    private Integer followersCount;
+    private Integer followingCount;
 }

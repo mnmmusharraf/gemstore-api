@@ -39,6 +39,14 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "timezone", source = "timezone")
     @Mapping(target = "locale", source = "locale")
+
+    // NEW
+    @Mapping(target = "website", source = "website")
+    @Mapping(target = "bio", source = "bio")
+    @Mapping(target = "privateProfile", source = "privateProfile")
+    @Mapping(target = "postsCount", source = "postsCount")
+    @Mapping(target = "followersCount", source = "followersCount")
+    @Mapping(target = "followingCount", source = "followingCount")
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "id", source = "id")
@@ -94,6 +102,11 @@ public interface UserMapper {
     @Mapping(target = "avatarUrl", source = "avatarUrl")
     @Mapping(target = "timezone", source = "timezone")
     @Mapping(target = "locale", source = "locale")
+
+    @Mapping(target = "website", source = "website")
+    @Mapping(target = "bio", source = "bio")
+    @Mapping(target = "privateProfile", source = "privateProfile")
+
     void updateUserFromProfile(UpdateProfileRequest request, @MappingTarget User user);
 
     /* ===================== Password Change (Handled in Service) ===================== */
