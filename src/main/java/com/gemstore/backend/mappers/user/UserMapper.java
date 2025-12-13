@@ -1,4 +1,4 @@
-package com.gemstore.backend.mappers;
+package com.gemstore.backend.mappers.user;
 
 
 import com.gemstore.backend.dtos.auth.RegisterUserRequest;

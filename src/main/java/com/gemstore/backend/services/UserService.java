@@ -4,7 +4,7 @@ import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
 import com.gemstore.backend.dtos.user.UpdateProfileRequest;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore. backend.exceptions.UserNotFoundException;
-import com.gemstore.backend. mappers.UserMapper;
+import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.repositories.user.UserRepository;
 import jakarta. validation.Valid;
 import lombok. RequiredArgsConstructor;

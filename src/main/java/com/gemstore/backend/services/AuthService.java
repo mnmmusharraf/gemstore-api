@@ -5,7 +5,7 @@ import com.gemstore.backend.dtos.auth.AuthResponse;
 import com.gemstore.backend.dtos.auth.LoginRequest;
 import com.gemstore.backend.dtos.auth.RegisterUserRequest;
 import com.gemstore.backend.entities.user.User;
-import com.gemstore.backend.mappers.UserMapper;
+import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.repositories.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;

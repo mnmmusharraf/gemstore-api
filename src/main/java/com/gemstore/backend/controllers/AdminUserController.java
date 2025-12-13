@@ -2,7 +2,7 @@ package com.gemstore.backend.controllers;
 
 
 import com.gemstore.backend.dtos.user.UserResponse;
-import com.gemstore.backend.mappers.UserMapper;
+import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
