@@ -1,4 +1,4 @@
-package com.gemstore.backend.services;
+package com.gemstore.backend.services.auth;
 
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.repositories.user.UserRepository;

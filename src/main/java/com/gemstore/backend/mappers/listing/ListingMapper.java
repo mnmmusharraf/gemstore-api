@@ -43,7 +43,7 @@ public interface ListingMapper {
     @Mapping(target = "listingNumber", source = "listingNumber")
     @Mapping(target = "title", source = "title")
     @Mapping(target = "imageUrl", expression = "java(getPrimaryImageUrl(entity))")
-    @Mapping(target = "gemstoneType", source = "gemstoneType. name")
+    @Mapping(target = "gemstoneType", source = "gemstoneType.name")
     @Mapping(target = "caratWeight", source = "caratWeight")
     @Mapping(target = "color", source = "color.name")
     @Mapping(target = "origin", source = "origin.name")
@@ -191,7 +191,7 @@ public interface ListingMapper {
     @Mapping(target = "favorites", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "searchVector", ignore = true)
+    //@Mapping(target = "searchVector", ignore = true)
     Listing toEntity(CreateListingRequest request);
 
     /* ===================== Partial Update ===================== */
@@ -239,7 +239,7 @@ public interface ListingMapper {
     @Mapping(target = "favorites", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "searchVector", ignore = true)
+    //@Mapping(target = "searchVector", ignore = true)
     void updateListingFromRequest(UpdateListingRequest request, @MappingTarget Listing listing);
 
     /* ===================== Helper Methods ===================== */

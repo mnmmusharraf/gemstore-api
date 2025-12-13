@@ -3,7 +3,7 @@ package com.gemstore.backend.controllers;
 
 import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.mappers.user.UserMapper;
-import com.gemstore.backend.services.UserService;
+import com.gemstore.backend.services.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -1,4 +1,4 @@
-package com.gemstore.backend.services;
+package com.gemstore.backend.services.storage;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

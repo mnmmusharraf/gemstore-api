@@ -5,7 +5,7 @@ import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.mappers.user.UserMapper;
 import com. gemstore.backend.security.UserPrincipal;
-import com.gemstore.backend.services. UserService;
+import com.gemstore.backend.services.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

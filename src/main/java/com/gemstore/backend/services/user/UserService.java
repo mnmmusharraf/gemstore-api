@@ -1,4 +1,4 @@
-package com.gemstore. backend.services;
+package com.gemstore.backend.services.user;
 
 import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
 import com.gemstore.backend.dtos.user.UpdateProfileRequest;
@@ -6,6 +6,7 @@ import com.gemstore.backend.entities.user.User;
 import com.gemstore. backend.exceptions.UserNotFoundException;
 import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.repositories.user.UserRepository;
+import com.gemstore.backend.services.storage.FileStorageService;
 import jakarta. validation.Valid;
 import lombok. RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

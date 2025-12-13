@@ -3,7 +3,7 @@ package com.gemstore.backend.controllers;
 
 import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
 import com.gemstore.backend.security.UserPrincipal;
-import com.gemstore.backend.services.UserService;
+import com.gemstore.backend.services.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

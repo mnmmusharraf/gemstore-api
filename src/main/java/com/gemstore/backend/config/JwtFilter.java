@@ -2,8 +2,8 @@ package com.gemstore.backend.config;
 
 
 
-import com.gemstore.backend.services.JWTService;
-import com.gemstore.backend.services.MyUserDetailsService;
+import com.gemstore.backend.services.auth.JWTService;
+import com.gemstore.backend.services.auth.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

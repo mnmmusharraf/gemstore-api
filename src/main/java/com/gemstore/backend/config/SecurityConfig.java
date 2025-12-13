@@ -1,7 +1,7 @@
 package com.gemstore.backend.config;
 
 
-import com.gemstore.backend.services.CustomOAuth2UserService;
+import com.gemstore.backend.services.auth.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
