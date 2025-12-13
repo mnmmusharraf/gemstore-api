@@ -1,6 +1,7 @@
-package com.gemstore.backend.dtos;
+package com.gemstore.backend.dtos.auth;
 
 
+import com.gemstore.backend.dtos.user.UserResponse;
 import lombok.Builder;
 import lombok.Data;
 

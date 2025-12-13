@@ -1,7 +1,10 @@
 package com.gemstore.backend.mappers;
 
 
-import com.gemstore.backend.dtos.*;
+import com.gemstore.backend.dtos.auth.RegisterUserRequest;
+import com.gemstore.backend.dtos.user.PublicUserDTO;
+import com.gemstore.backend.dtos.user.UpdateProfileRequest;
+import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.entities.user.User;
 import org.mapstruct.*;
 

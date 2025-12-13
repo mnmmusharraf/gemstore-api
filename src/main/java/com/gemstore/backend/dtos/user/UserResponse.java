@@ -1,4 +1,4 @@
-package com.gemstore.backend.dtos;
+package com.gemstore.backend.dtos.user;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

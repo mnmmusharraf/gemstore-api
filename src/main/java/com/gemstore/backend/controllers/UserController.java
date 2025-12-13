@@ -1,7 +1,7 @@
 package com.gemstore.backend.controllers;
 
-import com.gemstore. backend.dtos.UpdateProfileRequest;
-import com.gemstore. backend.dtos.UserResponse;
+import com.gemstore.backend.dtos.user.UpdateProfileRequest;
+import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.mappers.UserMapper;
 import com. gemstore.backend.security.UserPrincipal;

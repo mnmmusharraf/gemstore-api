@@ -1,7 +1,7 @@
 package com.gemstore.backend.controllers;
 
 
-import com.gemstore.backend.dtos.ChangePasswordRequest;
+import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
 import com.gemstore.backend.security.UserPrincipal;
 import com.gemstore.backend.services.UserService;
 import jakarta.validation.Valid;

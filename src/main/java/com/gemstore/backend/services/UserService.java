@@ -1,7 +1,7 @@
 package com.gemstore. backend.services;
 
-import com. gemstore.backend.dtos. ChangePasswordRequest;
-import com. gemstore.backend.dtos. UpdateProfileRequest;
+import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
+import com.gemstore.backend.dtos.user.UpdateProfileRequest;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore. backend.exceptions.UserNotFoundException;
 import com.gemstore.backend. mappers.UserMapper;

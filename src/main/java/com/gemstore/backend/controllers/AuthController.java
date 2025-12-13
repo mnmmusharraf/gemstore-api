@@ -2,10 +2,10 @@ package com.gemstore.backend.controllers;
 
 
 
-import com.gemstore.backend.dtos.AuthResponse;
-import com.gemstore.backend.dtos.LoginRequest;
-import com.gemstore.backend.dtos.RegisterUserRequest;
-import com.gemstore.backend.dtos.UserResponse;
+import com.gemstore.backend.dtos.auth.AuthResponse;
+import com.gemstore.backend.dtos.auth.LoginRequest;
+import com.gemstore.backend.dtos.auth.RegisterUserRequest;
+import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.mappers.UserMapper;
 import com.gemstore.backend.security.UserPrincipal;
 import com.gemstore.backend.services.AuthService;

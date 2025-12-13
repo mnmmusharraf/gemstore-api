@@ -1,4 +1,4 @@
-package com.gemstore.backend.dtos;
+package com.gemstore.backend.dtos.auth;
 
 
 import jakarta.validation.constraints.NotBlank;
