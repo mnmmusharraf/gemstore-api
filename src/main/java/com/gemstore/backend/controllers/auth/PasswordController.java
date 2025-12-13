@@ -1,4 +1,4 @@
-package com.gemstore.backend.controllers;
+package com.gemstore.backend.controllers.auth;
 
 
 import com.gemstore.backend.dtos.auth.ChangePasswordRequest;

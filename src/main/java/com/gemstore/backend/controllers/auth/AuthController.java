@@ -1,4 +1,4 @@
-package com.gemstore.backend.controllers;
+package com.gemstore.backend.controllers.auth;
 
 
 

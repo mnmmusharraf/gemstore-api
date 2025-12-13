@@ -1,4 +1,4 @@
-package com.gemstore.backend.controllers;
+package com.gemstore.backend.controllers.user;
 
 
 import com.gemstore.backend.dtos.user.UserResponse;
