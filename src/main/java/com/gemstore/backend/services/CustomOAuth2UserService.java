@@ -1,7 +1,7 @@
 package com.gemstore.backend.services;
 
-import com.gemstore.backend.entities.User;
-import com.gemstore.backend.repositories.UserRepository;
+import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

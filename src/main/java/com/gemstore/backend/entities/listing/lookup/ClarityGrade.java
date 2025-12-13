@@ -1,15 +1,17 @@
-package com.gemstore.backend.entities.lookup;
+package com.gemstore.backend.entities.listing.lookup;
+
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "cuts")
+@Table(name = "clarity_grades")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cut {
+public class ClarityGrade {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +19,9 @@ public class Cut {
 
     @Column(nullable = false, unique = true, length = 30)
     private String name;
+
+    @Column(nullable = false)
+    private Integer rank;
 
     @Column(name = "is_active")
     private Boolean isActive = true;

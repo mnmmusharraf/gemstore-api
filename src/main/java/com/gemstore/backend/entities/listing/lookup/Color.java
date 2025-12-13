@@ -1,4 +1,4 @@
-package com.gemstore.backend.entities.lookup;
+package com.gemstore.backend.entities.listing.lookup;
 
 import jakarta.persistence.*;
 import lombok.*;

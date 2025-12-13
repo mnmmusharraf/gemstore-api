@@ -1,23 +1,22 @@
-package com.gemstore.backend.entities.lookup;
+package com.gemstore.backend.entities.listing.lookup;
 
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "clarity_grades")
+@Table(name = "color_qualities")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClarityGrade {
-
+public class ColorQuality {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, unique = true, length = 20)
     private String name;
 
     @Column(nullable = false)

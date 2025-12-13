@@ -1,8 +1,8 @@
 package com.gemstore.backend.services;
 
 
-import com.gemstore.backend.entities.User;
-import com.gemstore.backend.repositories.UserRepository;
+import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.UserRepository;
 import com.gemstore.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.DisabledException;

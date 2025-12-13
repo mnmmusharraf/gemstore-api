@@ -1,9 +1,8 @@
-package com.gemstore.backend.entities;
+package com.gemstore.backend.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Comment;
 
 import java.time.Instant;
 

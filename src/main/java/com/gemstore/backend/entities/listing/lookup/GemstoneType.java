@@ -1,15 +1,17 @@
-package com.gemstore.backend.entities.lookup;
+package com.gemstore.backend.entities.listing.lookup;
 
 import jakarta.persistence.*;
 import lombok.*;
 
+
+
 @Entity
-@Table(name = "treatments")
+@Table(name = "gemstone_types")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Treatment {
+public class GemstoneType {
 
     @Id
     @GeneratedValue(strategy = GenerationType. IDENTITY)
@@ -17,6 +19,9 @@ public class Treatment {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;
+
+    @Column(length = 20)
+    private String category;
 
     @Column(name = "is_active")
     private Boolean isActive = true;

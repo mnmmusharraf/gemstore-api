@@ -1,4 +1,4 @@
-package com.gemstore. backend.entities;
+package com.gemstore.backend.entities.listing;
 
 import jakarta. persistence.*;
 import lombok.*;

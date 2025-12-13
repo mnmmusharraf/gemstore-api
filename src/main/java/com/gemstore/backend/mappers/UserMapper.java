@@ -2,7 +2,7 @@ package com.gemstore.backend.mappers;
 
 
 import com.gemstore.backend.dtos.*;
-import com.gemstore.backend.entities.User;
+import com.gemstore.backend.entities.user.User;
 import org.mapstruct.*;
 
 /**

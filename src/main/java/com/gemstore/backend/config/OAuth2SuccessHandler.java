@@ -1,7 +1,7 @@
 package com.gemstore.backend.config;
 
-import com.gemstore.backend.entities.User;
-import com.gemstore.backend.repositories.UserRepository;
+import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.UserRepository;
 import com.gemstore.backend.services.JWTService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

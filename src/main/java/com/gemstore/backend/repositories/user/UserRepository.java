@@ -1,6 +1,6 @@
-package com.gemstore.backend.repositories;
+package com.gemstore.backend.repositories.user;
 
-import com.gemstore.backend.entities.User;
+import com.gemstore.backend.entities.user.User;
 import org.springframework.data.jpa.repository. JpaRepository;
 import org. springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

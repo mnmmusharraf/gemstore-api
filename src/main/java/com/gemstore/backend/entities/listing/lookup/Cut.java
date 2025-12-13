@@ -1,21 +1,21 @@
-package com.gemstore.backend.entities.lookup;
+package com.gemstore.backend.entities.listing.lookup;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "origins")
+@Table(name = "cuts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Origin {
+public class Cut {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 30)
     private String name;
 
     @Column(name = "is_active")

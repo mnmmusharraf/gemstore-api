@@ -1,5 +1,6 @@
-package com.gemstore.backend.entities;
+package com.gemstore.backend.entities.listing;
 
+import com.gemstore.backend.entities.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
