@@ -1,29 +1,27 @@
 package com.gemstore.backend.config;
 
-
-import com.gemstore.backend.services.auth.CustomOAuth2UserService;
+import com.gemstore.backend.services. auth.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.beans.factory. annotation.Autowired;
+import org.springframework.context.annotation. Bean;
+import org.springframework. context.annotation.Configuration;
+import org.springframework.security.authentication. AuthenticationManager;
+import org. springframework.security.authentication.AuthenticationProvider;
+import org.springframework. security.authentication.dao.DaoAuthenticationProvider;
+import org. springframework.security.config.Customizer;
+import org.springframework. security.config.annotation.authentication. configuration.AuthenticationConfiguration;
+import org.springframework.security.config. annotation.web.builders.HttpSecurity;
+import org.springframework. security.config.annotation.web. configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+import org.springframework.security. core.userdetails.UserDetailsService;
+import org.springframework. security.crypto.bcrypt.BCryptPasswordEncoder;
+import org. springframework.security.crypto.password. PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.gemstore.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
+import org.springframework.security.web. authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework. web.cors.CorsConfiguration;
+import org.springframework.web. cors.CorsConfigurationSource;
+import org.springframework.web. cors.UrlBasedCorsConfigurationSource;
+import com. gemstore.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -49,47 +47,50 @@ public class SecurityConfig {
                                                    OAuth2FailureHandler oAuth2FailureHandler) throws Exception {
 
         http
-                // Disable CSRF for APIs, enable for web (you could add .csrf(csrf -> csrf.disable()) if no forms)
-                .cors(Customizer.withDefaults())
+                . cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        // Permit login/auth endpoints and OAuth2 endpoints
+                        // Auth endpoints
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/login/oauth2/**", "/oauth2/**").permitAll()
-                        // Permit static resources if needed (optional)
+
+                        // ✅ ADD THESE LINES - Public API endpoints
+                        .requestMatchers("/api/v1/lookups/**").permitAll()
+                        . requestMatchers("/api/v1/listings").permitAll()
+                        .requestMatchers("/api/v1/listings/search").permitAll()
+                        . requestMatchers("/api/v1/listings/seller/**").permitAll()
+                        .requestMatchers("/api/v1/listings/{id}").permitAll()
+                        .requestMatchers("/api/v1/listings/{id}/detail").permitAll()
+                        . requestMatchers("/api/test").permitAll()
+
+                        // Static resources
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )
 
-                // Exception handling for REST APIs
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
                 )
 
-                // OAuth2 login configuration
                 .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(authorization -> authorization
+                        . authorizationEndpoint(authorization -> authorization
                                 .authorizationRequestRepository(authorizationRequestRepository())
                         )
                         .userInfoEndpoint(ui -> ui.userService(customOAuth2UserService))
-                        .successHandler(oAuth2SuccessHandler)
+                        . successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
                 )
 
-                // HTTP Basic (optional, for debugging)
                 .httpBasic(Customizer.withDefaults())
 
-                // Session management:
-                // - IF_REQUIRED allows a session for OAuth2 login flow
-                // - For APIs, JWT filter will handle statelessness
                 .sessionManagement(sm -> sm
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                 )
 
-                // JWT filter for /api/** endpoints
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -116,24 +117,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // Allow your React dev server
         config.setAllowedOrigins(java.util.List.of("http://localhost:5173"));
-
-        // Allow common HTTP methods
-        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        // Allow all headers (Authorization, Content-Type, etc.)
-        config.setAllowedHeaders(java.util.List.of("*"));
-
-        // If you ever need cookies with CORS, keep this true.
-        // For pure "Authorization: Bearer <token>" headers it's fine as well.
+        config.setAllowedMethods(java.util.List. of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(java. util.List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-
 }
