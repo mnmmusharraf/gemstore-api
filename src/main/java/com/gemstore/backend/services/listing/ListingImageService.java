@@ -3,10 +3,12 @@ package com.gemstore.backend.services.listing;
 import com.gemstore.backend.entities. listing.Listing;
 import com. gemstore.backend.entities.listing.ListingImage;
 import com.gemstore.backend.repositories.listing.ListingImageRepository;
+import com.gemstore.backend.services.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j. Slf4j;
 import org. springframework.stereotype.Service;
 import org.springframework.transaction.annotation. Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,6 +21,8 @@ import java.util.List;
 public class ListingImageService {
 
     private final ListingImageRepository listingImageRepository;
+    private final FileStorageService fileStorageService;
+
 
     private static final int MAX_IMAGES = 10;
 
@@ -112,5 +116,27 @@ public class ListingImageService {
     @Transactional(readOnly = true)
     public List<ListingImage> getImagesForListing(Long listingId) {
         return listingImageRepository.findByListingIdOrderByDisplayOrderAsc(listingId);
+    }
+
+    // ListingService.java
+    @Transactional
+    public String uploadListingImage(Long userId, MultipartFile file) {
+        // -- Validate file --
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("File must be an image");
+        }
+
+        long maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("File size must be less than 5MB");
+        }
+
+        // -- Use the storage service --
+        return fileStorageService.uploadFile(file, "listing-images/" + userId);
     }
 }

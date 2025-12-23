@@ -24,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final FileStorageService fileStorageService; // <-- ADD THIS
+    private final FileStorageService fileStorageService;
 
     /**
      * Returns all users, excluding soft-deleted ones.

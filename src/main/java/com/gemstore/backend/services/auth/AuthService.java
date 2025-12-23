@@ -7,13 +7,17 @@ import com.gemstore.backend.dtos.auth.RegisterUserRequest;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.repositories.user.UserRepository;
+import com.gemstore.backend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -22,54 +26,88 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
 
-    public AuthResponse register(RegisterUserRequest req) {
-        String emailNorm = req.getEmail().trim().toLowerCase();
-        String usernameNorm = req.getUsername().trim();
-        String displayNameNorm = req.getDisplayName().trim();
+public AuthResponse register(RegisterUserRequest req) {
 
-        if (userRepository.existsByEmailIgnoreCase(emailNorm)) {
-            throw new IllegalStateException("Email already used");
-        }
-        if (userRepository.existsByUsernameIgnoreCase(usernameNorm)) {
-            throw new IllegalStateException("Username already taken");
-        }
+    String emailNorm = req.getEmail().trim().toLowerCase();
+    String usernameNorm = req.getUsername().trim();
+    String displayNameNorm = req.getDisplayName().trim();
 
-        User user = userMapper.toEntity(req);
-        user.setEmail(emailNorm);
-        user.setUsername(usernameNorm);
-        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
-        user.setDisplayName(displayNameNorm);
-        try {
-            userRepository.save(user);
-        } catch (Exception e) {
-            // handle database error, e.g., log and throw a custom exception
-            throw new RuntimeException("Failed to register user", e);
-        }
-
-        String token = jwtService.generateToken(user.getUsername());
-        return AuthResponse.builder()
-                .token(token)
-                .tokenType("Bearer")
-                .user(userMapper.toUserResponse(user))
-                .newUser(true)
-                .build();
+    if (userRepository.existsByEmailIgnoreCase(emailNorm)) {
+        throw new IllegalStateException("Email already used");
+    }
+    if (userRepository.existsByUsernameIgnoreCase(usernameNorm)) {
+        throw new IllegalStateException("Username already taken");
     }
 
-    public AuthResponse login(LoginRequest req) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getIdentifier(), req.getPassword()));
+    User user = userMapper.toEntity(req);
+    user.setEmail(emailNorm);
+    user.setUsername(usernameNorm);
+    user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+    user.setDisplayName(displayNameNorm);
 
-        // Resolve user so token subject is consistent (username)
-        User user = userRepository.findByEmailIgnoreCase(req.getIdentifier())
-                .or(() -> userRepository.findByUsernameIgnoreCase(req.getIdentifier()))
-                .orElseThrow(() -> new IllegalStateException("Invalid credentials")); // Shouldn't happen if auth passed
+    if (user.getRole() == null) user.setRole("USER");
 
-        String token = jwtService.generateToken(user.getUsername());
+    user = userRepository.save(user);
+
+    //  generate token with uid + role
+    String token = jwtService.generateToken(
+            user.getId(),
+            user.getUsername(),
+            user.getRole()
+    );
+
+    log.info("[AuthService] Registration token generated for userId={}", user.getId());
+
+    return AuthResponse.builder()
+            .token(token)
+            .tokenType("Bearer")
+            .user(userMapper.toUserResponse(user))
+            .newUser(true)
+            .build();
+}
+
+
+    public AuthResponse login(LoginRequest request) {
+
+        // Authenticate (this triggers UserDetailsService)
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getIdentifier(),
+                        request.getPassword()
+                )
+        );
+
+        // Get authenticated user
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        //  Extract role (remove ROLE_ prefix)
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("USER");
+
+        //  Generate JWT with userId + username + role
+        String token = jwtService.generateToken(
+                userDetails.getId(),       // userId
+                userDetails.getUsername(), // subject
+                role                       // role
+        );
+
+        // Log
+        log.info("[AuthService] Token generated for userId={}, username={}",
+                userDetails.getId(),
+                userDetails.getUsername());
+
+        // Build response
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
-                .user(userMapper.toUserResponse(user))
+                .user(userMapper.toUserResponse(
+                        userRepository.findById(userDetails.getId()).orElseThrow()
+                ))
                 .newUser(false)
                 .build();
     }
+
 }

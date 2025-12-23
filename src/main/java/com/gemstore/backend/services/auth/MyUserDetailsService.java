@@ -3,6 +3,7 @@ package com.gemstore.backend.services.auth;
 
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.repositories.user.UserRepository;
+import com.gemstore.backend.security.CustomUserDetails;
 import com.gemstore.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.DisabledException;
@@ -26,6 +27,6 @@ public class MyUserDetailsService implements UserDetailsService {
         if (user.isLocked()) throw new LockedException("Account locked until " + user.getLockedUntil());
         if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) throw new DisabledException("Account not active");
 
-        return UserPrincipal.from(user);
+        return CustomUserDetails.from(user);
     }
 }

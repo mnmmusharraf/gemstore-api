@@ -1,14 +1,14 @@
 // controllers/listing/FavoriteController.java
-package com.gemstore.backend. controllers.listing;
+package com.gemstore.backend.controllers.listing;
 
-import com. gemstore.backend.dtos. common.ApiResponse;
+import com.gemstore.backend.dtos.common.ApiResponse;
 import com.gemstore.backend.dtos.common.PageResponse;
-import com. gemstore.backend.dtos. listing.response.ListingCardResponse;
+import com.gemstore.backend.dtos.listing.response.ListingCardResponse;
+import com.gemstore.backend.security.CustomUserDetails;
 import com.gemstore.backend.services.listing.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework. security.core.userdetails. UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -30,12 +30,12 @@ public class FavoriteController {
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> getMyFavorites(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        PageResponse<ListingCardResponse> favorites =
+                favoriteService.getUserFavorites(principal.getId(), page, size);
 
-        Long userId = extractUserId(userDetails);
-        PageResponse<ListingCardResponse> favorites = favoriteService.getUserFavorites(userId, page, size);
-
-        return ResponseEntity. ok(ApiResponse.success(favorites));
+        return ResponseEntity.ok(ApiResponse.success(favorites));
     }
 
     /**
@@ -43,15 +43,13 @@ public class FavoriteController {
      */
     @GetMapping("/count")
     public ResponseEntity<ApiResponse<Long>> getFavoritesCount(
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long userId = extractUserId(userDetails);
-        long count = favoriteService.getFavoritesCount(userId);
-
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        long count = favoriteService.getFavoritesCount(principal.getId());
         return ResponseEntity.ok(ApiResponse.success(count));
     }
 
-    /* ===================== Add/Remove Favorites ===================== */
+    /* ===================== Add / Remove Favorites ===================== */
 
     /**
      * Add listing to favorites.
@@ -59,12 +57,10 @@ public class FavoriteController {
     @PostMapping("/{listingId}")
     public ResponseEntity<ApiResponse<Void>> addFavorite(
             @PathVariable Long listingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long userId = extractUserId(userDetails);
-        favoriteService.addFavorite(userId, listingId);
-
-        return ResponseEntity.ok(ApiResponse. success("Added to favorites", null));
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        favoriteService.addFavorite(principal.getId(), listingId);
+        return ResponseEntity.ok(ApiResponse.success("Added to favorites", null));
     }
 
     /**
@@ -73,13 +69,13 @@ public class FavoriteController {
     @DeleteMapping("/{listingId}")
     public ResponseEntity<ApiResponse<Void>> removeFavorite(
             @PathVariable Long listingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long userId = extractUserId(userDetails);
-        favoriteService.removeFavorite(userId, listingId);
-
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        favoriteService.removeFavorite(principal.getId(), listingId);
         return ResponseEntity.ok(ApiResponse.success("Removed from favorites", null));
     }
+
+    /* ===================== Toggle / Check ===================== */
 
     /**
      * Toggle favorite status.
@@ -87,15 +83,18 @@ public class FavoriteController {
     @PostMapping("/{listingId}/toggle")
     public ResponseEntity<ApiResponse<ToggleResponse>> toggleFavorite(
             @PathVariable Long listingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        boolean isFavorited =
+                favoriteService.toggleFavorite(principal.getId(), listingId);
 
-        Long userId = extractUserId(userDetails);
-        boolean isFavorited = favoriteService.toggleFavorite(userId, listingId);
+        String message = isFavorited
+                ? "Added to favorites"
+                : "Removed from favorites";
 
-        ToggleResponse response = new ToggleResponse(isFavorited);
-        String message = isFavorited ? "Added to favorites" : "Removed from favorites";
-
-        return ResponseEntity.ok(ApiResponse.success(message, response));
+        return ResponseEntity.ok(
+                ApiResponse.success(message, new ToggleResponse(isFavorited))
+        );
     }
 
     /**
@@ -104,24 +103,14 @@ public class FavoriteController {
     @GetMapping("/{listingId}/check")
     public ResponseEntity<ApiResponse<ToggleResponse>> checkFavorite(
             @PathVariable Long listingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        boolean isFavorited =
+                favoriteService.isFavorited(principal.getId(), listingId);
 
-        Long userId = extractUserId(userDetails);
-        boolean isFavorited = favoriteService.isFavorited(userId, listingId);
-
-        return ResponseEntity.ok(ApiResponse. success(new ToggleResponse(isFavorited)));
-    }
-
-    /* ===================== Helper ===================== */
-
-    private Long extractUserId(UserDetails userDetails) {
-        if (userDetails == null) {
-            throw new com.gemstore.backend.exceptions. UnauthorizedException("Authentication required");
-        }
-        if (userDetails instanceof com.gemstore.backend.security.CustomUserDetails customUserDetails) {
-            return customUserDetails.getId();
-        }
-        throw new IllegalStateException("Unable to extract user ID");
+        return ResponseEntity.ok(
+                ApiResponse.success(new ToggleResponse(isFavorited))
+        );
     }
 
     /* ===================== Response DTO ===================== */

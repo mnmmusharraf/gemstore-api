@@ -7,6 +7,7 @@ import com.gemstore.backend.dtos.auth.LoginRequest;
 import com.gemstore.backend.dtos.auth.RegisterUserRequest;
 import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.mappers.user.UserMapper;
+import com.gemstore.backend.security.CustomUserDetails;
 import com.gemstore.backend.security.UserPrincipal;
 import com.gemstore.backend.services.auth.AuthService;
 import com.gemstore.backend.services.user.UserService;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
@@ -60,10 +62,19 @@ public class AuthController {
     /**
      * Returns the authenticated user's profile (self view).
      */
+//    @GetMapping("/me")
+//    public ResponseEntity<UserResponse> me(Authentication authentication) {
+//        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+//        var user = userService.getById(principal.getId());
+//        return ResponseEntity.ok(userMapper.toUserResponse(user));
+//    }
+
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(Authentication authentication) {
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+    public ResponseEntity<UserResponse> me(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
         var user = userService.getById(principal.getId());
         return ResponseEntity.ok(userMapper.toUserResponse(user));
     }
+
 }

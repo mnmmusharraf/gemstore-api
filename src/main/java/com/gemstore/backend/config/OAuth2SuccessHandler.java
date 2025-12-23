@@ -24,7 +24,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
     private final JWTService jwtService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
 
@@ -117,10 +116,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             }
 
             // 4) Generate JWT and redirect to frontend
-            String token = jwtService.generateToken(username, Map.of(
-                    "uid", user.getId(),
-                    "role", user.getRole()
-            ));
+            String token = jwtService.generateToken(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getRole()
+            );
+
 
             String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
             String redirectUrl = "http://localhost:5173/oauth2/success?token=" + encodedToken;

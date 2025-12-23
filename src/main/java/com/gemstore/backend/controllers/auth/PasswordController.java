@@ -1,17 +1,16 @@
 package com.gemstore.backend.controllers.auth;
 
-
 import com.gemstore.backend.dtos.auth.ChangePasswordRequest;
-import com.gemstore.backend.security.UserPrincipal;
+import com.gemstore.backend.security.CustomUserDetails;
 import com.gemstore.backend.services.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Dedicated password operations (optional; can also live in AuthController).
+ * Dedicated password operations.
  */
 @RestController
 @RequestMapping("/api/auth/password")
@@ -20,10 +19,14 @@ public class PasswordController {
 
     private final UserService userService;
 
+    /**
+     * Change current user's password.
+     */
     @PostMapping("/change")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
-                                               Authentication authentication) {
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
         userService.changePassword(principal.getId(), request);
         return ResponseEntity.noContent().build();
     }

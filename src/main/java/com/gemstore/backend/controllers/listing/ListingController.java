@@ -1,42 +1,41 @@
 package com.gemstore.backend.controllers.listing;
 
 import com.gemstore.backend.dtos.common.ApiResponse;
-import com. gemstore.backend.dtos. common.PageResponse;
-import com.gemstore. backend.dtos.listing.request.*;
+import com.gemstore.backend.dtos.common.PageResponse;
+import com.gemstore.backend.dtos.listing.request.*;
 import com.gemstore.backend.dtos.listing.response.*;
+import com.gemstore.backend.security.CustomUserDetails;
+import com.gemstore.backend.services.listing.ListingImageService;
 import com.gemstore.backend.services.listing.ListingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework. http.ResponseEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security. core.userdetails.UserDetails;
-import org.springframework. web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
-/**
- * ListingController handles all listing-related endpoints.
- */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/listings")
 @RequiredArgsConstructor
 public class ListingController {
 
     private final ListingService listingService;
+    private final ListingImageService listingImageService;
 
     /* ===================== Create ===================== */
 
-    /**
-     * Create a new listing.
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<ListingResponse>> createListing(
             @Valid @RequestBody CreateListingRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        ListingResponse listing = listingService. createListing(request, userId);
+        ListingResponse listing = listingService.createListing(request, user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -45,52 +44,43 @@ public class ListingController {
 
     /* ===================== Read ===================== */
 
-    /**
-     * Get listing by ID (basic response).
-     */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ListingResponse>> getListingById(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserIdOrNull(userDetails);
+        Long userId = user != null ? user.getId() : null;
         ListingResponse listing = listingService.getListingById(id, userId);
 
-        return ResponseEntity. ok(ApiResponse.success(listing));
+        return ResponseEntity.ok(ApiResponse.success(listing));
     }
 
-    /**
-     * Get listing detail (full response with price history & related).
-     */
     @GetMapping("/{id}/detail")
     public ResponseEntity<ApiResponse<ListingDetailResponse>> getListingDetail(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserIdOrNull(userDetails);
+        Long userId = user != null ? user.getId() : null;
         ListingDetailResponse listing = listingService.getListingDetail(id, userId);
 
-        return ResponseEntity. ok(ApiResponse.success(listing));
+        return ResponseEntity.ok(ApiResponse.success(listing));
     }
 
-    /**
-     * Get all active listings (paginated).
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> getActiveListings(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserIdOrNull(userDetails);
-        PageResponse<ListingCardResponse> listings = listingService.getActiveListings(page, size, userId);
+        Long userId = user != null ? user.getId() : null;
+        PageResponse<ListingCardResponse> listings =
+                listingService.getActiveListings(page, size, userId);
 
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
-    /**
-     * Search listings with filters.
-     */
+    /* ===================== Search ===================== */
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> searchListings(
             @RequestParam(required = false) String query,
@@ -109,7 +99,7 @@ public class ListingController {
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
         ListingSearchRequest request = ListingSearchRequest.builder()
                 .query(query)
@@ -130,173 +120,146 @@ public class ListingController {
                 .size(size)
                 .build();
 
-        Long userId = extractUserIdOrNull(userDetails);
-        PageResponse<ListingCardResponse> listings = listingService.searchListings(request, userId);
+        Long userId = user != null ? user.getId() : null;
+        PageResponse<ListingCardResponse> listings =
+                listingService.searchListings(request, userId);
 
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
-    /**
-     * Search listings with POST (for complex filters).
-     */
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> searchListingsPost(
             @RequestBody ListingSearchRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserIdOrNull(userDetails);
-        PageResponse<ListingCardResponse> listings = listingService.searchListings(request, userId);
+        Long userId = user != null ? user.getId() : null;
+        PageResponse<ListingCardResponse> listings =
+                listingService.searchListings(request, userId);
 
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
-    /**
-     * Get listings by seller. 
-     */
+    /* ===================== Seller / My Listings ===================== */
+
     @GetMapping("/seller/{sellerId}")
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> getListingsBySeller(
             @PathVariable Long sellerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserIdOrNull(userDetails);
-        PageResponse<ListingCardResponse> listings = listingService.getListingsBySeller(sellerId, page, size, userId);
+        Long userId = user != null ? user.getId() : null;
+        PageResponse<ListingCardResponse> listings =
+                listingService.getListingsBySeller(sellerId, page, size, userId);
 
         return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
-    /**
-     * Get current user's listings.
-     */
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<PageResponse<ListingCardResponse>>> getMyListings(
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        PageResponse<ListingCardResponse> listings = listingService.getMyListings(userId, status, page, size);
+        PageResponse<ListingCardResponse> listings =
+                listingService.getMyListings(user.getId(), status, page, size);
 
-        return ResponseEntity.ok(ApiResponse. success(listings));
+        return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
     /* ===================== Update ===================== */
 
-    /**
-     * Update a listing.
-     */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ListingResponse>> updateListing(
             @PathVariable Long id,
             @Valid @RequestBody UpdateListingRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        ListingResponse listing = listingService.updateListing(id, request, userId);
-
-        return ResponseEntity. ok(ApiResponse.success("Listing updated successfully", listing));
-    }
-
-    /**
-     * Partial update (PATCH).
-     */
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<ListingResponse>> patchListing(
-            @PathVariable Long id,
-            @RequestBody UpdateListingRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long userId = extractUserId(userDetails);
-        ListingResponse listing = listingService.updateListing(id, request, userId);
+        ListingResponse listing =
+                listingService.updateListing(id, request, user.getId());
 
         return ResponseEntity.ok(ApiResponse.success("Listing updated successfully", listing));
     }
 
-    /* ===================== Status Management ===================== */
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<ListingResponse>> patchListing(
+            @PathVariable Long id,
+            @RequestBody UpdateListingRequest request,
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-    /**
-     * Mark listing as sold.
-     */
+        ListingResponse listing =
+                listingService.updateListing(id, request, user.getId());
+
+        return ResponseEntity.ok(ApiResponse.success("Listing updated successfully", listing));
+    }
+
+    /* ===================== Status ===================== */
+
     @PostMapping("/{id}/sold")
     public ResponseEntity<ApiResponse<ListingResponse>> markAsSold(
             @PathVariable Long id,
             @RequestParam(required = false) BigDecimal soldPrice,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        ListingResponse listing = listingService. markAsSold(id, soldPrice, userId);
+        ListingResponse listing =
+                listingService.markAsSold(id, soldPrice, user.getId());
 
         return ResponseEntity.ok(ApiResponse.success("Listing marked as sold", listing));
     }
 
-    /**
-     * Archive listing.
-     */
     @PostMapping("/{id}/archive")
     public ResponseEntity<ApiResponse<Void>> archiveListing(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        listingService. archiveListing(id, userId);
-
+        listingService.archiveListing(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Listing archived", null));
     }
 
-    /**
-     * Reactivate listing.
-     */
     @PostMapping("/{id}/reactivate")
     public ResponseEntity<ApiResponse<ListingResponse>> reactivateListing(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        ListingResponse listing = listingService.reactivateListing(id, userId);
+        ListingResponse listing =
+                listingService.reactivateListing(id, user.getId());
 
         return ResponseEntity.ok(ApiResponse.success("Listing reactivated", listing));
     }
 
     /* ===================== Delete ===================== */
 
-    /**
-     * Delete listing.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteListing(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        Long userId = extractUserId(userDetails);
-        listingService.deleteListing(id, userId);
-
-        return ResponseEntity. ok(ApiResponse.success("Listing deleted", null));
+        listingService.deleteListing(id, user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Listing deleted", null));
     }
 
-    /* ===================== Helper Methods ===================== */
+    /* ===================== Image Upload ===================== */
 
-    private Long extractUserId(UserDetails userDetails) {
-        if (userDetails == null) {
-            throw new com.gemstore.backend.exceptions. UnauthorizedException("Authentication required");
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadListingImage(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+
+        if (user == null) {
+            log.warn("[UPLOAD] user is NULL (unauthenticated request)");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authentication required"));
         }
-        // Assuming your UserDetails implementation has getId() method
-        // Adjust based on your actual implementation
-        if (userDetails instanceof com.gemstore.backend.security.CustomUserDetails customUserDetails) {
-            return customUserDetails.getId();
-        }
-        throw new IllegalStateException("Unable to extract user ID");
+
+        log.info("[UPLOAD] Authenticated user: id={}, username={}, roles={}",
+                user.getId(),
+                user.getUsername(),
+                user.getAuthorities());
+
+        String imageUrl = listingImageService.uploadListingImage(user.getId(), file);
+        return ResponseEntity.ok(Map.of("url", imageUrl));
     }
 
-    private Long extractUserIdOrNull(UserDetails userDetails) {
-        if (userDetails == null) {
-            return null;
-        }
-        try {
-            return extractUserId(userDetails);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
