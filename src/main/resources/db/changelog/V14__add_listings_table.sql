@@ -104,7 +104,7 @@ CREATE TABLE listings (
                           gemstone_type_id INT NOT NULL REFERENCES gemstone_types(id),  -- Master_Gem_Type
                           carat_weight DECIMAL(8,3) NOT NULL,                           -- Carat_Weight
                           color_id INT REFERENCES colors(id),                           -- Gem_Color
-                          color_quality_id INT REFERENCES color_qualities(id),          -- Color_Quality ✅ Added
+                          color_quality_id INT REFERENCES color_qualities(id),          -- Color_Quality
                           clarity_id INT REFERENCES clarity_grades(id),                 -- Clarity_Score
                           cut_id INT REFERENCES cuts(id),                               -- Shape
                           origin_id INT REFERENCES origins(id),                         -- Origin

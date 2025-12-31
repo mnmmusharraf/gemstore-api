@@ -1,24 +1,24 @@
 package com.gemstore.backend.config;
 
-import com.gemstore.backend.services.auth.CustomOAuth2UserService;
-import com.gemstore.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.gemstore. backend.services.auth.CustomOAuth2UserService;
+import com.gemstore.backend.security. HttpCookieOAuth2AuthorizationRequestRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security. authentication.AuthenticationManager;
+import org.springframework.security.authentication. AuthenticationProvider;
+import org. springframework.security.authentication.dao. DaoAuthenticationProvider;
+import org.springframework.security.config. Customizer;
+import org. springframework.security.config.annotation. authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security. config.annotation.web.builders. HttpSecurity;
+import org.springframework.security.config.annotation. web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework. security.core.userdetails. UserDetailsService;
+import org. springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto. password.PasswordEncoder;
+import org.springframework.security.web. SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,30 +37,27 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
 
-    /* ===================== SECURITY FILTER CHAIN ===================== */
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                /* ---------- CORS & CSRF ---------- */
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
-                /* ---------- Session Management (JWT = STATELESS) ---------- */
                 .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        sm.sessionCreationPolicy(SessionCreationPolicy. STATELESS)
                 )
 
-                /* ---------- Exception Handling ---------- */
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint((req, res, e) ->
                                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
                         )
                 )
 
-                /* ---------- Authorization Rules ---------- */
                 .authorizeHttpRequests(auth -> auth
+
+                        //  Static resources - uploaded images (PUBLIC)
+                        .requestMatchers("/uploads/**").permitAll()
 
                         // Auth endpoints
                         .requestMatchers(
@@ -71,9 +68,9 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // Public APIs
-                        .requestMatchers("/api/v1/lookups/**").permitAll()
+                        . requestMatchers("/api/v1/lookups/**").permitAll()
                         .requestMatchers("/api/v1/listings/search").permitAll()
-                        .requestMatchers("/api/v1/listings/seller/**").permitAll()
+                        . requestMatchers("/api/v1/listings/seller/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/listings/**").permitAll()
                         .requestMatchers("/api/test").permitAll()
 
@@ -84,7 +81,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                /* ---------- OAuth2 Login ---------- */
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authz ->
                                 authz.authorizationRequestRepository(authorizationRequestRepository())
@@ -96,13 +92,10 @@ public class SecurityConfig {
                         .failureHandler(oAuth2FailureHandler)
                 )
 
-                /* ---------- JWT Filter ---------- */
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-    /* ===================== AUTHENTICATION ===================== */
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -118,21 +111,15 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    /* ===================== PASSWORD ENCODER ===================== */
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
-    /* ===================== OAUTH2 COOKIE REPO ===================== */
-
     @Bean
     public HttpCookieOAuth2AuthorizationRequestRepository authorizationRequestRepository() {
         return new HttpCookieOAuth2AuthorizationRequestRepository();
     }
-
-    /* ===================== CORS CONFIG ===================== */
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

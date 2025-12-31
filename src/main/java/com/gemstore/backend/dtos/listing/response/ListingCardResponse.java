@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util. List;
 
 /**
  * Lightweight DTO for listing cards (grid/list view)
@@ -18,8 +19,11 @@ public class ListingCardResponse {
     private String listingNumber;
     private String title;
 
-    // Primary image only
-    private String imageUrl;
+    // Images - ALL images for carousel
+    private List<String> imageUrls;
+
+    // Primary image (for thumbnails / backward compatibility)
+    private String primaryImageUrl;
 
     // Key specs
     private String gemstoneType;
