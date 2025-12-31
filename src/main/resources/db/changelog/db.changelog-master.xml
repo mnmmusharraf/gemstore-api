@@ -79,4 +79,33 @@
                  endDelimiter="$$"/>
     </changeSet>
 
+    <!-- 14. Add listings tables -->
+    <changeSet id="20251114162740-14" author="mnm-musharraf">
+        <sqlFile path="V14__add_listings_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 15. Altering listings tables -->
+    <changeSet id="20251114162740-15" author="mnm-musharraf">
+        <sqlFile path="V15__auto_generated_fields_in_listings.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 16. Price History (Auto-tracked when price changes) -->
+    <changeSet id="20251114162740-16" author="mnm-musharraf">
+        <sqlFile path="V16__ML_tracking_tables.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 17. Triggers to listing table -->
+    <changeSet id="20251114162740-17" author="mnm-musharraf">
+        <sqlFile path="V17__add_triggers_to_listings.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+                 endDelimiter="$$"
+        />
+    </changeSet>
+
+    <!-- 18. Indexes to listings -->
+    <changeSet id="20251114162740-18" author="mnm-musharraf">
+        <sqlFile path="V18__add_new_indexes_to_listings.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

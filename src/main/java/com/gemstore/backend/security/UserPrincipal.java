@@ -1,7 +1,7 @@
 package com.gemstore.backend.security;
 
 
-import com.gemstore.backend.entities.User;
+import com.gemstore.backend.entities.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
