@@ -1,29 +1,27 @@
 package com.gemstore.backend.services.listing;
 
-import com.gemstore.backend.dtos.common.PageResponse;
-import com.gemstore. backend.dtos.listing.request.*;
+import com.gemstore.backend. dtos.common.PageResponse;
+import com.gemstore.backend.dtos.listing. request.*;
 import com.gemstore.backend.dtos.listing.response.*;
 import com.gemstore.backend.entities.user.User;
-import com.gemstore. backend.entities.listing.*;
+import com.gemstore.backend.entities.listing.*;
 import com.gemstore.backend.exceptions.ResourceNotFoundException;
-import com.gemstore.backend.exceptions.UnauthorizedException;
-import com. gemstore.backend.mappers. listing.ListingMapper;
+import com. gemstore.backend.exceptions.UnauthorizedException;
+import com. gemstore.backend.mappers.listing.ListingMapper;
 import com.gemstore.backend.mappers.listing.ListingPriceHistoryMapper;
 import com.gemstore.backend.repositories.listing.*;
 import com.gemstore.backend.repositories.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j. Slf4j;
-import org. springframework.data.domain.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.math. BigDecimal;
+import java. time.LocalDateTime;
 import java.util. List;
+import java.util. Set;
 
-/**
- * ListingService handles all listing-related business logic.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,6 +36,8 @@ public class ListingService {
     private final LookupService lookupService;
     private final ListingImageService listingImageService;
     private final ListingViewService listingViewService;
+    private final LikeService likeService;           // NEW
+    private final FavoriteService favoriteService;   // NEW
 
     private final ListingMapper listingMapper;
     private final ListingPriceHistoryMapper priceHistoryMapper;
@@ -48,29 +48,23 @@ public class ListingService {
     public ListingResponse createListing(CreateListingRequest request, Long sellerId) {
         log.info("Creating listing for seller: {}", sellerId);
 
-        // Get seller
         User seller = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + sellerId));
 
-        // Map basic fields
         Listing listing = listingMapper.toEntity(request);
         listing.setSeller(seller);
 
-        // Resolve lookup entities
         resolveLookupEntities(listing, request.getGemstoneTypeId(), request.getColorId(),
                 request.getColorQualityId(), request.getClarityId(), request.getCutId(),
                 request.getOriginId(), request.getTreatmentId());
 
-        // Save listing
         listing = listingRepository. save(listing);
 
-        // Generate listing number (after save to get ID)
-        listing.setListingNumber(generateListingNumber(listing.getId()));
+        listing. setListingNumber(generateListingNumber(listing.getId()));
         listing = listingRepository.save(listing);
 
-        // Handle images
         if (request.getImageUrls() != null && ! request.getImageUrls().isEmpty()) {
-            listingImageService.addImages(listing, request.getImageUrls(), request.getPrimaryImageIndex());
+            listingImageService.addImages(listing, request. getImageUrls(), request.getPrimaryImageIndex());
         }
 
         log.info("Created listing: {}", listing.getListingNumber());
@@ -85,43 +79,38 @@ public class ListingService {
 
         Listing listing = getListingEntity(listingId);
 
-        // Check ownership
         if (!listing.getSeller().getId().equals(userId)) {
             throw new UnauthorizedException("You can only update your own listings");
         }
 
-        // Check if listing can be updated
-        if (listing. getIsSold()) {
+        if (listing.getIsSold()) {
             throw new IllegalStateException("Cannot update a sold listing");
         }
 
-        // Apply updates
         listingMapper.updateListingFromRequest(request, listing);
 
-        // Resolve lookup entities if changed
         if (request.getGemstoneTypeId() != null) {
             listing.setGemstoneType(lookupService.getGemstoneTypeById(request.getGemstoneTypeId()));
         }
         if (request.getColorId() != null) {
-            listing.setColor(lookupService.getColorById(request. getColorId()));
+            listing. setColor(lookupService.getColorById(request.getColorId()));
         }
         if (request.getColorQualityId() != null) {
             listing.setColorQuality(lookupService.getColorQualityById(request.getColorQualityId()));
         }
         if (request.getClarityId() != null) {
-            listing.setClarity(lookupService.getClarityGradeById(request.getClarityId()));
+            listing. setClarity(lookupService. getClarityGradeById(request.getClarityId()));
         }
-        if (request.getCutId() != null) {
-            listing.setCut(lookupService.getCutById(request. getCutId()));
+        if (request. getCutId() != null) {
+            listing.setCut(lookupService.getCutById(request.getCutId()));
         }
         if (request.getOriginId() != null) {
             listing.setOrigin(lookupService.getOriginById(request.getOriginId()));
         }
-        if (request.getTreatmentId() != null) {
-            listing.setTreatment(lookupService.getTreatmentById(request.getTreatmentId()));
+        if (request. getTreatmentId() != null) {
+            listing.setTreatment(lookupService. getTreatmentById(request. getTreatmentId()));
         }
 
-        // Handle images if provided
         if (request.getImageUrls() != null) {
             listingImageService. updateImages(listing, request.getImageUrls(), request.getPrimaryImageIndex());
         }
@@ -140,9 +129,9 @@ public class ListingService {
 
         ListingResponse response = listingMapper. toResponse(listing);
 
-        // Set user context
         if (userId != null) {
-            response.setIsFavorited(favoriteRepository.existsByUserIdAndListingId(userId, listingId));
+            response.setIsLiked(likeService.isLiked(listingId, userId));
+            response.setIsFavorited(favoriteService.isFavorited(listingId, userId));
         }
 
         return response;
@@ -152,32 +141,27 @@ public class ListingService {
     public ListingDetailResponse getListingDetail(Long listingId, Long userId) {
         Listing listing = getListingEntity(listingId);
 
-        // Record view
         if (userId != null) {
             listingViewService.recordView(listingId, userId);
         } else {
             listingViewService.recordAnonymousView(listingId);
         }
 
-        // Map to detail response
         ListingDetailResponse response = listingMapper.toDetailResponse(listing);
 
-        // Add price history
         List<ListingPriceHistory> priceHistory = priceHistoryRepository
-                .findByListingIdOrderByCreatedAtDesc(listingId);
+                . findByListingIdOrderByCreatedAtDesc(listingId);
         response.setPriceHistory(priceHistoryMapper.toDTOList(priceHistory));
 
-        // Add related listings
         List<Listing> relatedListings = findRelatedListings(listing, 4);
         response.setRelatedListings(listingMapper.toCardResponseList(relatedListings));
 
-        // Set user context
         if (userId != null) {
-            response.setIsFavorited(favoriteRepository.existsByUserIdAndListingId(userId, listingId));
+            response.setIsLiked(likeService.isLiked(listingId, userId));
+            response.setIsFavorited(favoriteService. isFavorited(listingId, userId));
             response.setIsOwner(listing.getSeller().getId().equals(userId));
         }
 
-        // Update seller stats
         if (response.getSeller() != null) {
             long totalListings = listingRepository.countBySellerIdAndStatus(
                     listing.getSeller().getId(), ListingStatus.ACTIVE);
@@ -191,8 +175,8 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public PageResponse<ListingCardResponse> getActiveListings(int page, int size, Long userId) {
-        Pageable pageable = PageRequest. of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Listing> listings = listingRepository. findByStatusOrderByCreatedAtDesc(
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction. DESC, "createdAt"));
+        Page<Listing> listings = listingRepository.findByStatusOrderByCreatedAtDesc(
                 ListingStatus.ACTIVE, pageable);
 
         return toPageResponse(listings, userId);
@@ -204,12 +188,9 @@ public class ListingService {
 
         Page<Listing> listings;
 
-        // Text search
         if (request.getQuery() != null && !request.getQuery().isBlank()) {
             listings = listingRepository.searchByText(request.getQuery(), pageable);
-        }
-        // Filter search
-        else {
+        } else {
             listings = listingRepository.searchListings(
                     request.getGemstoneTypeId(),
                     request.getColorId(),
@@ -257,7 +238,6 @@ public class ListingService {
 
         Listing listing = getListingEntity(listingId);
 
-        // Check ownership
         if (!listing.getSeller().getId().equals(userId)) {
             throw new UnauthorizedException("You can only update your own listings");
         }
@@ -271,7 +251,6 @@ public class ListingService {
         listing.setSoldAt(LocalDateTime.now());
         listing. setStatus(ListingStatus. SOLD);
 
-        // Calculate days to sell
         if (listing.getCreatedAt() != null) {
             long days = java.time.Duration.between(
                     listing.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant(),
@@ -348,12 +327,10 @@ public class ListingService {
     private void resolveLookupEntities(Listing listing, Integer gemstoneTypeId, Integer colorId,
                                        Integer colorQualityId, Integer clarityId, Integer cutId,
                                        Integer originId, Integer treatmentId) {
-        // Required
         listing.setGemstoneType(lookupService.getGemstoneTypeById(gemstoneTypeId));
 
-        // Optional
         if (colorId != null) {
-            listing.setColor(lookupService. getColorById(colorId));
+            listing.setColor(lookupService.getColorById(colorId));
         }
         if (colorQualityId != null) {
             listing.setColorQuality(lookupService.getColorQualityById(colorQualityId));
@@ -362,7 +339,7 @@ public class ListingService {
             listing.setClarity(lookupService.getClarityGradeById(clarityId));
         }
         if (cutId != null) {
-            listing. setCut(lookupService.getCutById(cutId));
+            listing.setCut(lookupService.getCutById(cutId));
         }
         if (originId != null) {
             listing.setOrigin(lookupService.getOriginById(originId));
@@ -377,7 +354,7 @@ public class ListingService {
     }
 
     private List<Listing> findRelatedListings(Listing listing, int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
+        Pageable pageable = PageRequest. of(0, limit);
         return listingRepository.findByGemstoneTypeIdAndStatus(
                         listing.getGemstoneType().getId(),
                         ListingStatus.ACTIVE,
@@ -401,22 +378,32 @@ public class ListingService {
         );
     }
 
+    /**
+     * Convert Page to PageResponse with user context (isLiked, isFavorited)
+     */
     private PageResponse<ListingCardResponse> toPageResponse(Page<Listing> page, Long userId) {
-        List<ListingCardResponse> content = page.getContent().stream()
-                .map(listing -> {
-                    ListingCardResponse card = listingMapper.toCardResponse(listing);
-                    if (userId != null) {
-                        card.setIsFavorited(favoriteRepository.existsByUserIdAndListingId(userId, listing.getId()));
-                    }
-                    return card;
-                })
-                .toList();
+        List<ListingCardResponse> content = listingMapper.toCardResponseList(page.getContent());
 
-        return PageResponse. <ListingCardResponse>builder()
+        // Set isLiked and isFavorited for current user (batch queries for efficiency)
+        if (userId != null && !content.isEmpty()) {
+            List<Long> listingIds = content.stream()
+                    .map(ListingCardResponse::getId)
+                    .toList();
+
+            Set<Long> likedIds = likeService.getLikedListingIds(userId, listingIds);
+            Set<Long> favoritedIds = favoriteService.getFavoritedListingIds(userId, listingIds);
+
+            content. forEach(card -> {
+                card.setIsLiked(likedIds.contains(card.getId()));
+                card.setIsFavorited(favoritedIds. contains(card.getId()));
+            });
+        }
+
+        return PageResponse.<ListingCardResponse>builder()
                 .content(content)
                 .page(page.getNumber())
                 .size(page.getSize())
-                .totalElements(page.getTotalElements())
+                .totalElements(page. getTotalElements())
                 .totalPages(page.getTotalPages())
                 .first(page.isFirst())
                 .last(page.isLast())

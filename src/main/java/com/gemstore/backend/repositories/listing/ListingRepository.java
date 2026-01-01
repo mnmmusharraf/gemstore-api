@@ -107,4 +107,12 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     // ML: Find listings with high completeness
     @Query("SELECT l FROM Listing l WHERE l.isSold = true AND l.completenessScore >= :minScore")
     List<Listing> findSoldListingsWithMinCompleteness(@Param("minScore") Integer minScore);
+
+    @Modifying
+    @Query("UPDATE Listing l SET l.likesCount = l.likesCount + 1 WHERE l.id = :listingId")
+    void incrementLikesCount(@Param("listingId") Long listingId);
+
+    @Modifying
+    @Query("UPDATE Listing l SET l.likesCount = GREATEST(l.likesCount - 1, 0) WHERE l.id = :listingId")
+    void decrementLikesCount(@Param("listingId") Long listingId);
 }

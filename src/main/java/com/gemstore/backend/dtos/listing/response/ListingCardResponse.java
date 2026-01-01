@@ -8,6 +8,7 @@ import java.util. List;
 
 /**
  * Lightweight DTO for listing cards (grid/list view)
+ * Includes all specs needed for feed display
  */
 @Data
 @NoArgsConstructor
@@ -21,15 +22,17 @@ public class ListingCardResponse {
 
     // Images - ALL images for carousel
     private List<String> imageUrls;
-
-    // Primary image (for thumbnails / backward compatibility)
     private String primaryImageUrl;
 
-    // Key specs
+    // Gemstone specs (all as strings - names, not IDs)
     private String gemstoneType;
     private BigDecimal caratWeight;
     private String color;
+    private String colorQuality;  // ADD
+    private String clarity;       // ADD
+    private String cut;           // ADD
     private String origin;
+    private String treatment;     // ADD
 
     // Price
     private BigDecimal price;
@@ -38,11 +41,13 @@ public class ListingCardResponse {
 
     // Stats
     private Integer viewsCount;
+    private Integer likesCount;
     private Integer favoritesCount;
 
     // Status
     private String status;
     private Boolean isSold;
+    private Boolean isCertified;  // ADD
 
     // Seller
     private Long sellerId;
@@ -52,6 +57,13 @@ public class ListingCardResponse {
     // Timestamps
     private LocalDateTime createdAt;
 
-    // User context (for logged-in users)
+    // User context
+    private Boolean isLiked;
     private Boolean isFavorited;
+
+    // Dimensions
+    private BigDecimal lengthMm;
+    private BigDecimal widthMm;
+    private BigDecimal depthMm;
+
 }

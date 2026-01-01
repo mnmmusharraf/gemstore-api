@@ -1,11 +1,11 @@
-package com.gemstore.backend.dtos.listing.response;
+package com.gemstore.backend. dtos.listing.response;
 
-import com.gemstore.backend.dtos.listing.lookup.LookupDTO;
+import com.gemstore.backend. dtos.listing.lookup.LookupDTO;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java. util.List;
+import java.util.List;
 
 /**
  * Full listing details (for single listing page)
@@ -54,6 +54,7 @@ public class ListingDetailResponse {
 
     // Engagement
     private Integer viewsCount;
+    private Integer likesCount;
     private Integer favoritesCount;
 
     // Sale
@@ -79,6 +80,7 @@ public class ListingDetailResponse {
     private LocalDateTime updatedAt;
 
     // User context
+    private Boolean isLiked;      // ADD THIS
     private Boolean isFavorited;
     private Boolean isOwner;
 

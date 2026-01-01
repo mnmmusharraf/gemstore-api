@@ -19,6 +19,7 @@ import org.springframework.stereotype. Service;
 import org.springframework. transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * FavoriteService handles user favorites/wishlist functionality.
@@ -80,9 +81,22 @@ public class FavoriteService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public boolean isFavorited(Long userId, Long listingId) {
+    /**
+     * Check if user has favorited a listing
+     */
+    public boolean isFavorited(Long listingId, Long userId) {
+        if (userId == null) return false;
         return favoriteRepository.existsByUserIdAndListingId(userId, listingId);
+    }
+
+    /**
+     * Batch check - get all favorited listing IDs for a user
+     */
+    public Set<Long> getFavoritedListingIds(Long userId, List<Long> listingIds) {
+        if (userId == null || listingIds. isEmpty()) {
+            return Set.of();
+        }
+        return favoriteRepository.findFavoritedListingIdsByUserId(userId, listingIds);
     }
 
     @Transactional(readOnly = true)
@@ -120,4 +134,6 @@ public class FavoriteService {
     public long getListingFavoritesCount(Long listingId) {
         return favoriteRepository.countByListingId(listingId);
     }
+
+
 }
