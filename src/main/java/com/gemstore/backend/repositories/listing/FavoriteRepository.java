@@ -11,6 +11,7 @@ import org.springframework.stereotype. Repository;
 
 import java.util. List;
 import java.util. Optional;
+import java.util.Set;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
@@ -31,4 +32,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     long countByUserId(Long userId);
 
     void deleteByUserIdAndListingId(Long userId, Long listingId);
-}
+
+    @Query("SELECT f. listing. id FROM Favorite f WHERE f. user.id = :userId AND f.listing.id IN :listingIds")
+    Set<Long> findFavoritedListingIdsByUserId(@Param("userId") Long userId, @Param("listingIds") List<Long> listingIds);}

@@ -179,4 +179,12 @@ public class Listing {
         images.remove(image);
         image.setListing(null);
     }
+
+    @Column(name = "likes_count")
+    @Builder. Default
+    private Integer likesCount = 0;
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
 }

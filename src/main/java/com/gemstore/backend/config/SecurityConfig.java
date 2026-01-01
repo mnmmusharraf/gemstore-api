@@ -77,6 +77,10 @@ public class SecurityConfig {
                         // Upload requires auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/listings/upload").authenticated()
 
+                        // Likes
+                        .requestMatchers(HttpMethod.GET, "/api/v1/likes/*/count").permitAll()
+                        .requestMatchers("/api/v1/likes/**").authenticated()
+
                         // Everything else
                         .anyRequest().authenticated()
                 )

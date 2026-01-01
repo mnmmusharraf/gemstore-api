@@ -27,10 +27,6 @@ public interface ListingMapper {
 
     /* ===================== Entity -> ListingCardResponse ===================== */
 
-    /**
-     * Lightweight DTO for listing cards in grid/list views.
-     * Includes all images for carousel display.
-     */
     @Mapping(target = "id", source = "id")
     @Mapping(target = "listingNumber", source = "listingNumber")
     @Mapping(target = "title", source = "title")
@@ -39,19 +35,29 @@ public interface ListingMapper {
     @Mapping(target = "gemstoneType", source = "gemstoneType.name")
     @Mapping(target = "caratWeight", source = "caratWeight")
     @Mapping(target = "color", source = "color.name")
+    @Mapping(target = "colorQuality", source = "colorQuality.name")  // ADD
+    @Mapping(target = "clarity", source = "clarity.name")            // ADD
+    @Mapping(target = "cut", source = "cut.name")                    // ADD
     @Mapping(target = "origin", source = "origin.name")
+    @Mapping(target = "treatment", source = "treatment.name")        // ADD
     @Mapping(target = "price", source = "price")
     @Mapping(target = "currency", source = "currency")
     @Mapping(target = "pricePerCarat", source = "pricePerCarat")
     @Mapping(target = "viewsCount", source = "viewsCount")
+    @Mapping(target = "likesCount", source = "likesCount")
     @Mapping(target = "favoritesCount", source = "favoritesCount")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "isSold", source = "isSold")
+    @Mapping(target = "isCertified", source = "isCertified")         // ADD
     @Mapping(target = "sellerId", source = "seller.id")
     @Mapping(target = "sellerName", source = "seller.displayName")
     @Mapping(target = "sellerAvatar", source = "seller.avatarUrl")
     @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "isFavorited", ignore = true) // Set in service
+    @Mapping(target = "isLiked", ignore = true)
+    @Mapping(target = "isFavorited", ignore = true)
+    @Mapping(target = "lengthMm", source = "lengthMm")
+    @Mapping(target = "widthMm", source = "widthMm")
+    @Mapping(target = "depthMm", source = "depthMm")
     ListingCardResponse toCardResponse(Listing entity);
 
     List<ListingCardResponse> toCardResponseList(List<Listing> entities);
@@ -90,6 +96,8 @@ public interface ListingMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "isFavorited", ignore = true)
+    @Mapping(target = "likesCount", source = "likesCount")
+    @Mapping(target = "isLiked", ignore = true)
     ListingResponse toResponse(Listing entity);
 
     List<ListingResponse> toResponseList(List<Listing> entities);

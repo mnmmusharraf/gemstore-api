@@ -108,4 +108,14 @@
         <sqlFile path="V18__add_new_indexes_to_listings.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <!-- 19. Alter likes table -->
+    <changeSet id="20251114162740-19" author="mnm-musharraf">
+        <sqlFile path="V19__alter_likes_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 20. Alter likes_count in listing table -->
+    <changeSet id="20251114162740-20" author="mnm-musharraf">
+        <sqlFile path="V20__alter_listing_add_likes_count.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

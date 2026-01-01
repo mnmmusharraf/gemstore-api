@@ -73,6 +73,9 @@ public class ListingResponse {
     // User context
     private Boolean isFavorited;
 
+    private Integer likesCount;
+    private Boolean isLiked;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
