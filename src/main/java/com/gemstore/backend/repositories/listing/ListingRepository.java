@@ -115,4 +115,6 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     @Modifying
     @Query("UPDATE Listing l SET l.likesCount = GREATEST(l.likesCount - 1, 0) WHERE l.id = :listingId")
     void decrementLikesCount(@Param("listingId") Long listingId);
-}
+
+    // Get all listings by seller (regardless of status)
+    Page<Listing> findBySellerId(Long sellerId, Pageable pageable);}
