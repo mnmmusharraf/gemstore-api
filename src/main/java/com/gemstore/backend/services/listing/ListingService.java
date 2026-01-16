@@ -127,7 +127,7 @@ public class ListingService {
     public ListingResponse getListingById(Long listingId, Long userId) {
         Listing listing = getListingEntity(listingId);
 
-        ListingResponse response = listingMapper. toResponse(listing);
+        ListingResponse response = listingMapper.toResponse(listing);
 
         if (userId != null) {
             response.setIsLiked(likeService.isLiked(listingId, userId));
@@ -150,7 +150,7 @@ public class ListingService {
         ListingDetailResponse response = listingMapper.toDetailResponse(listing);
 
         List<ListingPriceHistory> priceHistory = priceHistoryRepository
-                . findByListingIdOrderByCreatedAtDesc(listingId);
+                .findByListingIdOrderByCreatedAtDesc(listingId);
         response.setPriceHistory(priceHistoryMapper.toDTOList(priceHistory));
 
         List<Listing> relatedListings = findRelatedListings(listing, 4);
@@ -217,14 +217,14 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public PageResponse<ListingCardResponse> getMyListings(Long userId, String status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest. of(page, size, Sort. by(Sort.Direction.DESC, "createdAt"));
 
         Page<Listing> listings;
-        if (status != null && ! status.isBlank()) {
-            ListingStatus listingStatus = ListingStatus.valueOf(status. toUpperCase());
+        if (status != null && !status.isBlank()) {
+            ListingStatus listingStatus = ListingStatus.valueOf(status.toUpperCase());
             listings = listingRepository.findBySellerIdAndStatus(userId, listingStatus, pageable);
         } else {
-            listings = listingRepository.findBySellerIdAndStatus(userId, null, pageable);
+            listings = listingRepository.findBySellerId(userId, pageable);
         }
 
         return toPageResponse(listings, userId);

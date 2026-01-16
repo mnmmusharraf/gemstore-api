@@ -118,4 +118,9 @@
         <sqlFile path="V20__alter_listing_add_likes_count.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <!-- 21. Add Notifications table -->
+    <changeSet id="20251114162740-21" author="mnm-musharraf">
+        <sqlFile path="V21__add_notifications_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>
