@@ -10,6 +10,7 @@ import org.hibernate.annotations. UpdateTimestamp;
 import java. math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -187,4 +188,15 @@ public class Listing {
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 
+    @Transient
+    public String getPrimaryImageUrl() {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        return images.stream()
+                .sorted(Comparator.comparingInt(ListingImage::getDisplayOrder))
+                .map(ListingImage::getImageUrl)
+                .findFirst()
+                .orElse(null);
+    }
 }

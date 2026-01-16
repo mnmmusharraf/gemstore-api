@@ -56,6 +56,9 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // WebSocket
+                        .requestMatchers("/ws/**", "/ws/info/**").permitAll()
+
                         //  Static resources - uploaded images (PUBLIC)
                         .requestMatchers("/uploads/**").permitAll()
 
@@ -68,9 +71,9 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // Public APIs
-                        . requestMatchers("/api/v1/lookups/**").permitAll()
+                        .requestMatchers("/api/v1/lookups/**").permitAll()
                         .requestMatchers("/api/v1/listings/search").permitAll()
-                        . requestMatchers("/api/v1/listings/seller/**").permitAll()
+                        .requestMatchers("/api/v1/listings/seller/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/listings/**").permitAll()
                         .requestMatchers("/api/test").permitAll()
 
@@ -125,18 +128,19 @@ public class SecurityConfig {
         return new HttpCookieOAuth2AuthorizationRequestRepository();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//
+//        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000",
+//                "*"));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//
+//        return source;
+//    }
 }

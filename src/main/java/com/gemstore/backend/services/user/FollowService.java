@@ -9,6 +9,7 @@ import com.gemstore.backend.exceptions.ResourceNotFoundException;
 import com.gemstore.backend.mappers.user.FollowMapper;
 import com.gemstore.backend.repositories.user.FollowRepository;
 import com.gemstore.backend.repositories.user.UserRepository;
+import com.gemstore.backend.services.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +32,9 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
-    private final FollowMapper followMapper;  // 👈 ADD THIS
+    private final FollowMapper followMapper;
+    private final NotificationService notificationService;
+
 
     /**
      * Follow a user
@@ -61,6 +64,11 @@ public class FollowService {
                 .build();
 
         followRepository.save(follow);
+        if(STATUS_PENDING.equals(status)) {
+            notificationService.notifyFollowRequest(following, follower);
+        }else{
+            notificationService.notifyFollow(following, follower);
+        }
 
         log.info("User {} {} user {}", followerId,
                 status. equals(STATUS_PENDING) ? "requested to follow" : "followed",
@@ -121,6 +129,7 @@ public class FollowService {
         following.setFollowersCount(following.getFollowersCount() + 1);
         userRepository.save(follower);
         userRepository.save(following);
+        notificationService.notifyFollowAccepted(follower, following);
 
         log.info("User {} accepted follow request from user {}", userId, followerId);
     }
