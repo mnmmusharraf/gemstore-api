@@ -165,6 +165,18 @@ public class FollowController {
         return ResponseEntity.ok(ApiResponse.success(following));
     }
 
+    /**
+     * Remove a follower from your followers list
+     */
+    @DeleteMapping("/followers/{followerId}/remove")
+    public ResponseEntity<ApiResponse<Void>> removeFollower(
+            @PathVariable Long followerId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        followService.removeFollower(principal. getId(), followerId);
+        return ResponseEntity.ok(ApiResponse. success("Follower removed", null));
+    }
+
     /* ===================== Response DTOs ===================== */
 
     public record FollowResponse(boolean isFollowing, boolean isPending) {}
