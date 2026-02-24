@@ -1,4 +1,4 @@
-package com.gemstore.backend.services. user;
+package com.gemstore.backend.services.user;
 
 import com.gemstore.backend. dtos.common.PageResponse;
 import com.gemstore.backend. dtos.user.UserSummaryResponse;
