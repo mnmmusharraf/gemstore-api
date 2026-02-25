@@ -70,6 +70,14 @@ public class SecurityConfig {
                                 "/login/oauth2/**"
                         ).permitAll()
 
+                        //  GEM PRICE PUBLIC ENDPOINTS
+                        .requestMatchers("/api/v1/gems/price/options").permitAll()
+                        .requestMatchers("/api/v1/gems/price/health").permitAll()
+
+                        //  GEM PRICE PROTECTED ENDPOINTS
+                        .requestMatchers("/api/v1/gems/price/predict").authenticated()
+                        .requestMatchers("/api/v1/gems/price/**").authenticated()
+
                         // Public APIs
                         .requestMatchers("/api/v1/lookups/**").permitAll()
                         .requestMatchers("/api/v1/listings/search").permitAll()
