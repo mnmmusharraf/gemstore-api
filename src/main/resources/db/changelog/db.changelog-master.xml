@@ -123,4 +123,12 @@
         <sqlFile path="V21__add_notifications_table.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <!-- 22. Alter Message table -->
+    <changeSet id="20251114162740-22" author="mnm-musharraf">
+        <sqlFile path="V22__alter_message_table.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
 </databaseChangeLog>
