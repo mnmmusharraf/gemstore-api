@@ -78,6 +78,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/gems/price/predict").authenticated()
                         .requestMatchers("/api/v1/gems/price/**").authenticated()
 
+                        // Message endpoints (all require authentication)
+                        .requestMatchers("/api/v1/messages/**").authenticated()
+
                         // Public APIs
                         .requestMatchers("/api/v1/lookups/**").permitAll()
                         .requestMatchers("/api/v1/listings/search").permitAll()
