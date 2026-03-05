@@ -1,7 +1,7 @@
 package com.gemstore.backend.dtos.message;
 
-import com.gemstore.backend.enums.MessageStatus;
-import com.gemstore.backend.enums.MessageType;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
+import com.gemstore.backend.entities.message.enums.MessageType;
 import lombok.*;
 
 import java.io.Serializable;

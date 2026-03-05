@@ -1,7 +1,6 @@
 package com.gemstore.backend.services.message;
 
 import com.gemstore.backend.dtos.message.MessageEventDto;
-import com.gemstore.backend.enums.MessageStatus;
 import com.gemstore.backend.repositories.message.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

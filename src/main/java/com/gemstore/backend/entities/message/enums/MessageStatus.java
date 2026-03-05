@@ -1,4 +1,4 @@
-package com.gemstore.backend.enums;
+package com.gemstore.backend.entities.message.enums;
 
 public enum MessageStatus {
     SENDING,    // Client is sending

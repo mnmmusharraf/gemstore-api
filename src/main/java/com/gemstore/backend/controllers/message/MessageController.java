@@ -4,6 +4,7 @@ import com.gemstore.backend.dtos.common.ApiResponse;
 import com.gemstore.backend.dtos.message.ConversationDto;
 import com.gemstore.backend.dtos.message.MessageRequestDto;
 import com.gemstore.backend.dtos.message.MessageResponseDto;
+import com.gemstore.backend.entities.message.enums.MessageType;
 import com.gemstore.backend.security.CustomUserDetails;
 import com.gemstore.backend.services.message.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -242,7 +243,7 @@ public class MessageController {
         MessageRequestDto request = MessageRequestDto.builder()
                 .receiverId(receiverId)
                 .content(message != null ? message : "Check out this gem!")
-                .messageType(com.gemstore.backend.enums.MessageType.LISTING)
+                .messageType(MessageType.LISTING)
                 .listingId(listingId)
                 .build();
 

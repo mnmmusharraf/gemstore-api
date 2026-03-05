@@ -1,6 +1,6 @@
 package com.gemstore.backend.dtos.message;
 
-import com.gemstore.backend.enums.MessageType;
+import com.gemstore.backend.entities.message.enums.MessageType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

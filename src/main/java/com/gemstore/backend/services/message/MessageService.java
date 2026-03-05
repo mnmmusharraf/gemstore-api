@@ -3,7 +3,7 @@ package com.gemstore.backend.services.message;
 import com.gemstore.backend.dtos.message.*;
 import com.gemstore.backend.entities.message.Message;
 import com.gemstore.backend.entities.user.User;
-import com.gemstore.backend.enums.MessageStatus;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
 import com.gemstore.backend.exceptions.BadRequestException;
 import com.gemstore.backend.exceptions.ResourceNotFoundException;
 import com.gemstore.backend.exceptions.UnauthorizedException;
