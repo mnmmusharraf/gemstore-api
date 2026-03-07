@@ -131,4 +131,22 @@
         />
     </changeSet>
 
+    <!-- 23. drop reports table -->
+    <changeSet id="20251114162740-23" author="mnm-musharraf">
+        <sqlFile path="V23__drop_reports_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 24. create reports table -->
+    <changeSet id="20251114162740-24" author="mnm-musharraf">
+        <sqlFile path="V24__create_reports_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 25 add triggers to reports  -->
+    <changeSet id="20251114162740-25" author="mnm-musharraf">
+        <sqlFile path="V25__add_triggers_to_reports.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+        />
+    </changeSet>
+
 </databaseChangeLog>

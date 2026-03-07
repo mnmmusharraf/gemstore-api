@@ -6,7 +6,7 @@ import com.gemstore.backend.dtos.message.MessageRequestDto;
 import com.gemstore.backend.dtos.message.MessageResponseDto;
 import com.gemstore.backend.entities.message.Message;
 import com.gemstore.backend.entities.user.User;
-import com.gemstore.backend.enums.MessageStatus;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
 import org.mapstruct.*;
 
 import java.time.LocalDateTime;

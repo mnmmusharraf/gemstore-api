@@ -1,6 +1,7 @@
 package com.gemstore.backend.services.message;
 
 import com.gemstore.backend.dtos.message.MessageEventDto;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -141,7 +142,7 @@ public class KafkaMessageProducer {
                 .messageId(messageId)
                 .senderId(senderId)
                 .receiverId(receiverId)
-                .status(com.gemstore.backend.enums.MessageStatus.DELIVERED)
+                .status(MessageStatus.DELIVERED)
                 .timestamp(java.time.LocalDateTime.now())
                 .build();
 
@@ -162,7 +163,7 @@ public class KafkaMessageProducer {
                 .messageId(messageId)
                 .senderId(senderId)
                 .receiverId(receiverId)
-                .status(com.gemstore.backend.enums.MessageStatus.READ)
+                .status(MessageStatus.READ)
                 .timestamp(java.time.LocalDateTime.now())
                 .build();
 

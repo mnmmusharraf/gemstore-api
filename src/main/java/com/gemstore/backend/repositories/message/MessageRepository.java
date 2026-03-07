@@ -1,7 +1,7 @@
 package com.gemstore.backend.repositories.message;
 
 import com.gemstore.backend.entities.message.Message;
-import com.gemstore.backend.enums.MessageStatus;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +21,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      */
     @Query("""
         SELECT m FROM Message m 
-        WHERE m.isDeleted = FALSE
+        WHERE m.isDeleted = false
         AND ((m.sender.id = :userId1 AND m.receiver.id = :userId2) 
              OR (m.sender.id = :userId2 AND m.receiver.id = :userId1))
         ORDER BY m.createdAt DESC
@@ -37,7 +37,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      */
     @Query("""
         SELECT m FROM Message m 
-        WHERE m.isDeleted = FALSE
+        WHERE m.isDeleted = false
         AND ((m.sender.id = :userId AND m.receiver.id = :partnerId) 
              OR (m.sender.id = :partnerId AND m.receiver.id = :userId))
         AND LOWER(m.content) LIKE LOWER(CONCAT('%', :query, '%'))
@@ -55,7 +55,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      */
     @Query("""
         SELECT m FROM Message m 
-        WHERE m.isDeleted = FALSE
+        WHERE m.isDeleted = false
         AND (m.sender.id = :userId OR m.receiver.id = :userId)
         AND LOWER(m.content) LIKE LOWER(CONCAT('%', :query, '%'))
         ORDER BY m.createdAt DESC
@@ -96,8 +96,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("""
         SELECT COUNT(m) FROM Message m 
         WHERE m.receiver.id = :userId 
-        AND m.status <> com.gemstore.backend.enums.MessageStatus.READ
-        AND m.isDeleted = FALSE
+        AND m.status <> com.gemstore.backend.entities.message.enums.MessageStatus.READ
+        AND m.isDeleted = false
     """)
     Integer countUnreadMessages(@Param("userId") Long userId);
 
@@ -108,8 +108,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         SELECT COUNT(m) FROM Message m 
         WHERE m.receiver.id = :receiverId 
         AND m.sender.id = :senderId 
-        AND m.status <> com.gemstore.backend.enums.MessageStatus.READ
-        AND m.isDeleted = FALSE
+        AND m.status <> com.gemstore.backend.entities.message.enums.MessageStatus.READ
+        AND m.isDeleted = false
     """)
     Integer countUnreadFromUser(
             @Param("receiverId") Long receiverId,
@@ -127,8 +127,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             m.updatedAt = :readAt
         WHERE m.receiver.id = :receiverId 
         AND m.sender.id = :senderId 
-        AND m.status <> com.gemstore.backend.enums.MessageStatus.READ
-        AND m.isDeleted = FALSE
+        AND m.status <> com.gemstore.backend.entities.message.enums.MessageStatus.READ
+        AND m.isDeleted = false
     """)
     int markMessagesAsRead(
             @Param("receiverId") Long receiverId,
@@ -143,10 +143,10 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("""
         UPDATE Message m 
-        SET m.status = com.gemstore.backend.enums.MessageStatus.DELIVERED,
+        SET m.status = com.gemstore.backend.entities.message.enums.MessageStatus.DELIVERED,
             m.updatedAt = :timestamp
         WHERE m.id = :messageId 
-        AND m.status = com.gemstore.backend.enums.MessageStatus.SENT
+        AND m.status = com.gemstore.backend.entities.message.enums.MessageStatus.SENT
     """)
     int markAsDelivered(
             @Param("messageId") Long messageId,
@@ -168,7 +168,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("""
         UPDATE Message m 
-        SET m.isDeleted = TRUE, 
+        SET m.isDeleted = true, 
             m.deletedAt = :timestamp, 
             m.updatedAt = :timestamp
         WHERE m.id = :messageId 

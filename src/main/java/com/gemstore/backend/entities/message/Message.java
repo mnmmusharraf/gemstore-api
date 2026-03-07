@@ -1,8 +1,8 @@
 package com.gemstore.backend.entities.message;
 
 import com.gemstore.backend.entities.user.User;
-import com.gemstore.backend.enums.MessageStatus;
-import com.gemstore.backend.enums.MessageType;
+import com.gemstore.backend.entities.message.enums.MessageStatus;
+import com.gemstore.backend.entities.message.enums.MessageType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
