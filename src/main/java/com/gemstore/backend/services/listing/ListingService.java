@@ -189,15 +189,16 @@ public class ListingService {
         Page<Listing> listings;
 
         if (request.getQuery() != null && !request.getQuery().isBlank()) {
-            listings = listingRepository.searchByText(request.getQuery(), pageable);
+            // Use LIKE-based search (works without search_vector column)
+            listings = listingRepository.searchByLike(request.getQuery(), pageable);
         } else {
             listings = listingRepository.searchListings(
                     request.getGemstoneTypeId(),
                     request.getColorId(),
                     request.getOriginId(),
-                    request. getMinPrice(),
+                    request.getMinPrice(),
                     request.getMaxPrice(),
-                    request. getMinCarat(),
+                    request.getMinCarat(),
                     request.getMaxCarat(),
                     pageable
             );

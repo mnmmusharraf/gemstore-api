@@ -2,13 +2,13 @@ package com.gemstore.backend.repositories.listing;
 
 import com.gemstore.backend.entities.listing.Listing;
 import com.gemstore.backend.entities.listing.ListingStatus;
-import org.springframework.data.domain. Page;
-import org.springframework. data.domain.Pageable;
-import org.springframework.data. jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository. Modifying;
-import org.springframework.data.jpa.repository. Query;
-import org.springframework. data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -44,23 +44,23 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     );
 
     // Carat range search
-    @Query("SELECT l FROM Listing l WHERE l. status = 'ACTIVE' AND l.caratWeight BETWEEN :minCarat AND :maxCarat")
+    @Query("SELECT l FROM Listing l WHERE l.status = 'ACTIVE' AND l.caratWeight BETWEEN :minCarat AND :maxCarat")
     Page<Listing> findByCaratRange(
             @Param("minCarat") BigDecimal minCarat,
             @Param("maxCarat") BigDecimal maxCarat,
             Pageable pageable
     );
 
-    // Combined search
+    // Combined filter search
     @Query("""
-            SELECT l FROM Listing l 
+            SELECT l FROM Listing l
             WHERE l.status = 'ACTIVE'
             AND (:gemstoneTypeId IS NULL OR l.gemstoneType.id = :gemstoneTypeId)
             AND (:colorId IS NULL OR l.color.id = :colorId)
-            AND (:originId IS NULL OR l.origin. id = :originId)
+            AND (:originId IS NULL OR l.origin.id = :originId)
             AND (:minPrice IS NULL OR l.price >= :minPrice)
-            AND (:maxPrice IS NULL OR l. price <= :maxPrice)
-            AND (:minCarat IS NULL OR l.caratWeight >= : minCarat)
+            AND (:maxPrice IS NULL OR l.price <= :maxPrice)
+            AND (:minCarat IS NULL OR l.caratWeight >= :minCarat)
             AND (:maxCarat IS NULL OR l.caratWeight <= :maxCarat)
             ORDER BY l.createdAt DESC
             """)
@@ -75,14 +75,35 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
             Pageable pageable
     );
 
-    // Full-text search
+    // Full-text search (requires search_vector column in DB)
     @Query(value = """
-            SELECT * FROM listings 
-            WHERE status = 'ACTIVE' 
-            AND search_vector @@ plainto_tsquery('english', : query)
-            ORDER BY ts_rank(search_vector, plainto_tsquery('english', : query)) DESC
+            SELECT * FROM listings
+            WHERE status = 'ACTIVE'
+            AND search_vector @@ plainto_tsquery('english', :query)
+            ORDER BY ts_rank(search_vector, plainto_tsquery('english', :query)) DESC
             """, nativeQuery = true)
     Page<Listing> searchByText(@Param("query") String query, Pageable pageable);
+
+    // LIKE-based text search — searches across all relevant fields
+    @Query("""
+            SELECT l FROM Listing l
+            LEFT JOIN l.color c
+            LEFT JOIN l.origin o
+            LEFT JOIN l.cut cu
+            LEFT JOIN l.treatment t
+            WHERE l.status = 'ACTIVE'
+            AND (
+                LOWER(l.title) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(l.description) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(l.gemstoneType.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(o.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(cu.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
+            ORDER BY l.createdAt DESC
+            """)
+    Page<Listing> searchByLike(@Param("query") String query, Pageable pageable);
 
     // Count by seller
     long countBySellerIdAndStatus(Long sellerId, ListingStatus status);
@@ -91,16 +112,12 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     @Query("SELECT l.gemstoneType.id, COUNT(l) FROM Listing l WHERE l.status = 'ACTIVE' GROUP BY l.gemstoneType.id")
     List<Object[]> countByGemstoneType();
 
-    // Featured listings
-//    @Query("SELECT l FROM Listing l WHERE l.status = 'ACTIVE' AND l.isFeatured = true ORDER BY l.createdAt DESC")
-//    List<Listing> findFeaturedListings(Pageable pageable);
-
     // Update view count
     @Modifying
     @Query("UPDATE Listing l SET l.viewsCount = l.viewsCount + 1 WHERE l.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    // ML:  Find sold listings
+    // ML: Find sold listings
     @Query("SELECT l FROM Listing l WHERE l.isSold = true ORDER BY l.soldAt DESC")
     Page<Listing> findSoldListings(Pageable pageable);
 
@@ -117,4 +134,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpec
     void decrementLikesCount(@Param("listingId") Long listingId);
 
     // Get all listings by seller (regardless of status)
-    Page<Listing> findBySellerId(Long sellerId, Pageable pageable);}
+    Page<Listing> findBySellerId(Long sellerId, Pageable pageable);
+}
