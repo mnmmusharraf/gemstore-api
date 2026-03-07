@@ -1,24 +1,25 @@
 package com.gemstore.backend.config;
 
-import com.gemstore. backend.services.auth.CustomOAuth2UserService;
-import com.gemstore.backend.security. HttpCookieOAuth2AuthorizationRequestRepository;
+import com.gemstore.backend.services.auth.CustomOAuth2UserService;
+import com.gemstore.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security. authentication.AuthenticationManager;
-import org.springframework.security.authentication. AuthenticationProvider;
-import org. springframework.security.authentication.dao. DaoAuthenticationProvider;
-import org.springframework.security.config. Customizer;
-import org. springframework.security.config.annotation. authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security. config.annotation.web.builders. HttpSecurity;
-import org.springframework.security.config.annotation. web.configuration.EnableWebSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework. security.core.userdetails. UserDetailsService;
-import org. springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto. password.PasswordEncoder;
-import org.springframework.security.web. SecurityFilterChain;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,6 +29,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -45,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(SessionCreationPolicy. STATELESS)
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .exceptionHandling(ex ->
@@ -59,7 +61,7 @@ public class SecurityConfig {
                         // WebSocket
                         .requestMatchers("/ws/**", "/ws/info/**").permitAll()
 
-                        //  Static resources - uploaded images (PUBLIC)
+                        // Static resources
                         .requestMatchers("/uploads/**").permitAll()
 
                         // Auth endpoints
@@ -70,15 +72,15 @@ public class SecurityConfig {
                                 "/login/oauth2/**"
                         ).permitAll()
 
-                        //  GEM PRICE PUBLIC ENDPOINTS
+                        // GEM PRICE PUBLIC ENDPOINTS
                         .requestMatchers("/api/v1/gems/price/options").permitAll()
                         .requestMatchers("/api/v1/gems/price/health").permitAll()
 
-                        //  GEM PRICE PROTECTED ENDPOINTS
+                        // GEM PRICE PROTECTED ENDPOINTS
                         .requestMatchers("/api/v1/gems/price/predict").authenticated()
                         .requestMatchers("/api/v1/gems/price/**").authenticated()
 
-                        // Message endpoints (all require authentication)
+                        // Message endpoints
                         .requestMatchers("/api/v1/messages/**").authenticated()
 
                         // Public APIs
@@ -94,6 +96,9 @@ public class SecurityConfig {
                         // Likes
                         .requestMatchers(HttpMethod.GET, "/api/v1/likes/*/count").permitAll()
                         .requestMatchers("/api/v1/likes/**").authenticated()
+
+                        // Admin endpoints — ADMIN role required
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Everything else
                         .anyRequest().authenticated()
@@ -138,20 +143,4 @@ public class SecurityConfig {
     public HttpCookieOAuth2AuthorizationRequestRepository authorizationRequestRepository() {
         return new HttpCookieOAuth2AuthorizationRequestRepository();
     }
-
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration config = new CorsConfiguration();
-//
-//        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000",
-//                "*"));
-//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-//        config.setAllowedHeaders(List.of("*"));
-//        config.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//
-//        return source;
-//    }
 }
