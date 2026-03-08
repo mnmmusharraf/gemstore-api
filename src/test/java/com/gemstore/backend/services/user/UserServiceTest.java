@@ -287,17 +287,18 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-018: Should hard delete user")
         void shouldHardDelete() {
-            when(userRepository.existsById(1L)).thenReturn(true);
+            User user = User.builder().id(1L).build();
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
             userService.deleteHard(1L);
 
-            verify(userRepository).deleteById(1L);
+            verify(userRepository).delete(user);
         }
 
         @Test
         @DisplayName("TC-USR-019: Should throw when user not found for hard delete")
         void shouldThrowWhenNotFound() {
-            when(userRepository.existsById(99L)).thenReturn(false);
+            when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.deleteHard(99L))
                     .isInstanceOf(UserNotFoundException.class);

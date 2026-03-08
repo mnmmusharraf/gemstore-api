@@ -5,6 +5,7 @@ import com.gemstore.backend.dtos.user.UpdateProfileRequest;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.repositories.user.UserRepository;
 import com.gemstore.backend.services.auth.JWTService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,6 +31,8 @@ class UserControllerIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTService jwtService;
+    @Autowired private EntityManager entityManager;
+    @Autowired private TransactionTemplate transactionTemplate;
 
     private User testUser;
     private String testToken;
@@ -36,6 +40,12 @@ class UserControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // Delete child tables first inside a real transaction to avoid FK constraint violations
+        transactionTemplate.execute(status -> {
+            entityManager.createNativeQuery("DELETE FROM listing_views").executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM listings").executeUpdate();
+            return null;
+        });
         userRepository.deleteAll();
 
         testUser = User.builder()
@@ -132,7 +142,6 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.displayName").value("Updated Name"))
                 .andExpect(jsonPath("$.bio").value("Updated bio"));
 
-        // Verify DB
         User updated = userRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updated.getDisplayName()).isEqualTo("Updated Name");
         assertThat(updated.getBio()).isEqualTo("Updated bio");
@@ -142,7 +151,6 @@ class UserControllerIntegrationTest {
     void patchProfile_partialUpdate_onlyUpdatesProvidedFields() throws Exception {
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setWebsite("https://newsite.com");
-        // bio is NOT set, should remain unchanged
 
         mockMvc.perform(patch("/api/users/me")
                         .header("Authorization", "Bearer " + testToken)
@@ -202,7 +210,6 @@ class UserControllerIntegrationTest {
 
     @Test
     void deleteAvatar_authenticated_returnsNoContent() throws Exception {
-        // Set an avatar first
         testUser.setAvatarUrl("https://example.com/avatar.png");
         userRepository.save(testUser);
 
@@ -243,7 +250,6 @@ class UserControllerIntegrationTest {
 
     @Test
     void deleteById_asAdmin_returnsNoContent() throws Exception {
-        // Create admin
         User admin = User.builder()
                 .displayName("Admin")
                 .email("admin@example.com")

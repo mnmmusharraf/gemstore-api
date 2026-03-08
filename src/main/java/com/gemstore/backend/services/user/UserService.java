@@ -29,6 +29,7 @@ public class UserService {
     /**
      * Returns all users, excluding soft-deleted ones.
      */
+    @Transactional(readOnly = true)
     public List<User> findAll() {
         return userRepository.findAll()
                 .stream()
@@ -128,10 +129,9 @@ public class UserService {
 
     @Transactional
     public void deleteHard(Long id) {
-        if (!userRepository. existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
-        userRepository. deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        userRepository.delete(user);
     }
 
     @Transactional
