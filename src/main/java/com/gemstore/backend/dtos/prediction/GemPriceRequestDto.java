@@ -1,3 +1,4 @@
+
 package com.gemstore.backend.dtos.prediction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,7 +20,7 @@ public class GemPriceRequestDto {
 
     @NotNull(message = "Carat weight is required")
     @Positive(message = "Carat weight must be positive")
-    @Max(value = 100, message = "Carat weight must be less than 100")
+    @DecimalMax(value = "100", inclusive = false, message = "Carat weight must be less than 100")
     @JsonProperty("carat_weight")
     private Double caratWeight;
 
