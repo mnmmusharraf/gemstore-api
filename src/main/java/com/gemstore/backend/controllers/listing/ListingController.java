@@ -35,6 +35,11 @@ public class ListingController {
             @Valid @RequestBody CreateListingRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
         ListingResponse listing = listingService.createListing(request, user.getId());
 
         return ResponseEntity
@@ -162,6 +167,11 @@ public class ListingController {
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
         PageResponse<ListingCardResponse> listings =
                 listingService.getMyListings(user.getId(), status, page, size);
 
@@ -176,6 +186,11 @@ public class ListingController {
             @Valid @RequestBody UpdateListingRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
         ListingResponse listing =
                 listingService.updateListing(id, request, user.getId());
 
@@ -187,6 +202,11 @@ public class ListingController {
             @PathVariable Long id,
             @RequestBody UpdateListingRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
 
         ListingResponse listing =
                 listingService.updateListing(id, request, user.getId());
@@ -202,6 +222,11 @@ public class ListingController {
             @RequestParam(required = false) BigDecimal soldPrice,
             @AuthenticationPrincipal CustomUserDetails user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
         ListingResponse listing =
                 listingService.markAsSold(id, soldPrice, user.getId());
 
@@ -213,6 +238,11 @@ public class ListingController {
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
         listingService.archiveListing(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Listing archived", null));
     }
@@ -221,6 +251,11 @@ public class ListingController {
     public ResponseEntity<ApiResponse<ListingResponse>> reactivateListing(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
 
         ListingResponse listing =
                 listingService.reactivateListing(id, user.getId());
@@ -234,6 +269,11 @@ public class ListingController {
     public ResponseEntity<ApiResponse<Void>> deleteListing(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required"));
+        }
 
         listingService.deleteListing(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Listing deleted", null));

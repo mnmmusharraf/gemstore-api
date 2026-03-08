@@ -21,11 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -87,7 +82,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/lookups/**").permitAll()
                         .requestMatchers("/api/v1/listings/search").permitAll()
                         .requestMatchers("/api/v1/listings/seller/**").permitAll()
+
+                        // ✅ Protected listing endpoints (MUST be BEFORE the GET wildcard)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/listings/my").authenticated()
+
+                        // Public: view any listing by ID (wildcard AFTER specific routes)
                         .requestMatchers(HttpMethod.GET, "/api/v1/listings/**").permitAll()
+
                         .requestMatchers("/api/test").permitAll()
 
                         // Upload requires auth
