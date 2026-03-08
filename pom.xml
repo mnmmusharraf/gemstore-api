@@ -151,6 +151,22 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2 in-memory database for tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring Security test utilities -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>
