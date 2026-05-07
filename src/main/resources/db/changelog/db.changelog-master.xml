@@ -149,4 +149,14 @@
         />
     </changeSet>
 
+    <!-- 26. add DOB to users_table -->
+    <changeSet id="20251114162740-26" author="mnm-musharraf">
+        <sqlFile path="V26__alter_users_tabe_DOB.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <!-- 27. create OTP table -->
+    <changeSet id="20251114162740-27" author="mnm-musharraf">
+        <sqlFile path="V27__create_OTP_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>
