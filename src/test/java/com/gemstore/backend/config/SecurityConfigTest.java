@@ -1,6 +1,7 @@
 package com.gemstore.backend.config;
 
 import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.listing.ListingRepository; // ✅ ADD THIS
 import com.gemstore.backend.repositories.user.UserRepository;
 import com.gemstore.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.gemstore.backend.services.auth.JWTService;
@@ -28,6 +29,7 @@ class SecurityConfigTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
+    @Autowired private ListingRepository listingRepository; // ✅ Inject ListingRepository
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTService jwtService;
 
@@ -42,6 +44,9 @@ class SecurityConfigTest {
 
     @BeforeEach
     void setUp() {
+        // ✅ Delete listings FIRST to prevent foreign key violation on seller_id
+        listingRepository.deleteAll();
+        // ✅ Then delete users
         userRepository.deleteAll();
 
         User user = User.builder()
