@@ -31,7 +31,15 @@ jobs:
       - name: Build and Test (H2)
         env:
           SPRING_PROFILES_ACTIVE: test
-        run: mvn clean verify
+        # Adding -e prints full stack traces, -B runs in batch mode
+        run: mvn clean verify -e -B
+
+      - name: Upload Test Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
 
       - name: Package JAR
         run: mvn package -DskipTests
