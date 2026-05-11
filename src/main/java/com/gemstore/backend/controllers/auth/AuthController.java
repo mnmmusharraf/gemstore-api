@@ -5,6 +5,7 @@ package com.gemstore.backend.controllers.auth;
 import com.gemstore.backend.dtos.auth.AuthResponse;
 import com.gemstore.backend.dtos.auth.LoginRequest;
 import com.gemstore.backend.dtos.auth.RegisterUserRequest;
+import com.gemstore.backend.dtos.auth.VerifyOtpRequest;
 import com.gemstore.backend.dtos.user.UserResponse;
 import com.gemstore.backend.mappers.user.UserMapper;
 import com.gemstore.backend.security.CustomUserDetails;
@@ -18,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import com.gemstore.backend.services.auth.EmailVerificationOtpService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final UserMapper userMapper;
+    private final EmailVerificationOtpService otpService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -75,6 +79,17 @@ public class AuthController {
     ) {
         var user = userService.getById(principal.getId());
         return ResponseEntity.ok(userMapper.toUserResponse(user));
+    }
+
+    @PostMapping("/verify-email/{userId}")
+    public ResponseEntity<?> verifyEmail(
+            @PathVariable Long userId,
+            @RequestBody @Valid VerifyOtpRequest request
+    ) {
+
+        otpService.verifyOtp(userId, request.getOtp());
+
+        return ResponseEntity.ok("Email verified successfully");
     }
 
 }

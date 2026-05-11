@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * User entity representing both local and social-auth identities.
@@ -132,6 +133,9 @@ public class User {
     @Builder.Default
     private Integer followingCount = 0;
 
+    // ========== DOB ==========
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
 
     // ---------- Lifecycle Hooks (if not using Spring Data JPA auditing) ----------

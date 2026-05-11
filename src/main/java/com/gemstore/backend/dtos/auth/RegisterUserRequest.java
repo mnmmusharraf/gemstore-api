@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class RegisterUserRequest {
 
@@ -24,6 +26,9 @@ public class RegisterUserRequest {
     @NotBlank
     @Size(min = 3, max = 40)
     private String username;
+
+    @Past(message = "Date of birth must be in the past")
+    private LocalDate dateOfBirth;
 
     // Optional future fields: locale, timezone
 }
