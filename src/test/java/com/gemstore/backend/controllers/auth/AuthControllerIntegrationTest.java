@@ -6,11 +6,13 @@ import com.gemstore.backend.dtos.auth.RegisterUserRequest;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.repositories.user.EmailVerificationOtpRepository;
 import com.gemstore.backend.repositories.user.UserRepository;
+import com.gemstore.backend.services.auth.EmailVerificationOtpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,9 +36,16 @@ class AuthControllerIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
+    // ✅ Mock the OTP service so it doesn't try to send real emails during tests
+    @MockBean
+    private EmailVerificationOtpService otpService;
+
     @BeforeEach
     void setUp() {
-        otpRepository.deleteAll(); // ✅ Added to prevent foreign key constraint violation
+        // Tell the mock to do nothing when an email is supposed to be sent
+        doNothing().when(otpService).generateAndSendOtp(any());
+
+        otpRepository.deleteAll(); // Prevent foreign key constraint violation
         userRepository.deleteAll();
     }
 
