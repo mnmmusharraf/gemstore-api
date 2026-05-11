@@ -38,6 +38,9 @@ class AuthServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JWTService jwtService;
 
+    // FIX: AuthService requires this, and register() calls it
+    @Mock private EmailVerificationOtpService otpService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -64,10 +67,6 @@ class AuthServiceTest {
                 .build();
     }
 
-    // ═══════════════════════════════════════
-    //  REGISTER TESTS
-    // ═══════════════════════════════════════
-
     @Nested
     @DisplayName("register()")
     class Register {
@@ -86,8 +85,6 @@ class AuthServiceTest {
         @Test
         @DisplayName("TC-AUTH-001: Should register user with valid data")
         void shouldRegisterWithValidData() {
-            // Create a fresh User that toEntity() will return.
-            // register() will OVERWRITE username/email/displayName/passwordHash on this object.
             User mappedUser = new User();
             mappedUser.setRole("USER");
 
@@ -100,7 +97,10 @@ class AuthServiceTest {
                 u.setId(1L);
                 return u;
             });
-            // After register() sets username to "newuser", generateToken is called with "newuser"
+
+            // FIX: register() calls otpService
+            doNothing().when(otpService).generateAndSendOtp(any(User.class));
+
             when(jwtService.generateToken(1L, "newuser", "USER")).thenReturn("jwt-token-123");
 
             UserResponse newUserResponse = UserResponse.builder()
@@ -122,6 +122,7 @@ class AuthServiceTest {
 
             verify(userRepository).save(any(User.class));
             verify(passwordEncoder).encode("SecurePass123");
+            verify(otpService).generateAndSendOtp(any(User.class));
             verify(jwtService).generateToken(1L, "newuser", "USER");
         }
 
@@ -135,6 +136,7 @@ class AuthServiceTest {
                     .hasMessageContaining("Email already used");
 
             verify(userRepository, never()).save(any());
+            verify(otpService, never()).generateAndSendOtp(any());
         }
 
         @Test
@@ -148,6 +150,7 @@ class AuthServiceTest {
                     .hasMessageContaining("Username already taken");
 
             verify(userRepository, never()).save(any());
+            verify(otpService, never()).generateAndSendOtp(any());
         }
 
         @Test
@@ -167,19 +170,24 @@ class AuthServiceTest {
                 u.setId(1L);
                 return u;
             });
+
+            // FIX: register() calls otpService
+            doNothing().when(otpService).generateAndSendOtp(any(User.class));
+
             when(jwtService.generateToken(anyLong(), anyString(), anyString())).thenReturn("token");
             when(userMapper.toUserResponse(any(User.class))).thenReturn(testUserResponse);
 
             authService.register(validRequest);
 
             verify(userRepository).existsByEmailIgnoreCase("new@gemstore.com");
+            verify(otpService).generateAndSendOtp(any(User.class));
         }
 
         @Test
         @DisplayName("TC-AUTH-005: Should set default role to USER when null")
         void shouldSetDefaultRole() {
             User userWithoutRole = new User();
-            userWithoutRole.setRole(null); // no role set
+            userWithoutRole.setRole(null);
 
             when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
             when(userRepository.existsByUsernameIgnoreCase(anyString())).thenReturn(false);
@@ -190,12 +198,17 @@ class AuthServiceTest {
                 u.setId(1L);
                 return u;
             });
+
+            // FIX: register() calls otpService
+            doNothing().when(otpService).generateAndSendOtp(any(User.class));
+
             when(jwtService.generateToken(anyLong(), anyString(), anyString())).thenReturn("token");
             when(userMapper.toUserResponse(any(User.class))).thenReturn(testUserResponse);
 
             authService.register(validRequest);
 
             assertThat(userWithoutRole.getRole()).isEqualTo("USER");
+            verify(otpService).generateAndSendOtp(any(User.class));
         }
 
         @Test
@@ -213,19 +226,20 @@ class AuthServiceTest {
                 u.setId(1L);
                 return u;
             });
+
+            // FIX: register() calls otpService
+            doNothing().when(otpService).generateAndSendOtp(any(User.class));
+
             when(jwtService.generateToken(anyLong(), anyString(), anyString())).thenReturn("token");
             when(userMapper.toUserResponse(any(User.class))).thenReturn(testUserResponse);
 
             authService.register(validRequest);
 
             verify(passwordEncoder).encode("SecurePass123");
+            verify(otpService).generateAndSendOtp(any(User.class));
             assertThat(mappedUser.getPasswordHash()).isEqualTo("$2a$12$encodedhash");
         }
     }
-
-    // ═══════════════════════════════════════
-    //  LOGIN TESTS
-    // ═══════════════════════════════════════
 
     @Nested
     @DisplayName("login()")
@@ -249,8 +263,12 @@ class AuthServiceTest {
             when(authentication.getPrincipal()).thenReturn(userDetails);
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(authentication);
+
             when(jwtService.generateToken(1L, "testuser", "USER")).thenReturn("login-jwt-token");
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+            // FIX: AuthService.login uses findActiveById()
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
+
             when(userMapper.toUserResponse(testUser)).thenReturn(testUserResponse);
 
             AuthResponse response = authService.login(validLoginRequest);
@@ -311,7 +329,9 @@ class AuthServiceTest {
             adminUser.setUsername("adminuser");
             adminUser.setRole("ADMIN");
 
-            when(userRepository.findById(2L)).thenReturn(Optional.of(adminUser));
+            // FIX: AuthService.login uses findActiveById()
+            when(userRepository.findActiveById(2L)).thenReturn(Optional.of(adminUser));
+
             when(jwtService.generateToken(2L, "adminuser", "ADMIN")).thenReturn("admin-token");
             when(userMapper.toUserResponse(adminUser)).thenReturn(testUserResponse);
 
@@ -333,8 +353,12 @@ class AuthServiceTest {
             Authentication authentication = mock(Authentication.class);
             when(authentication.getPrincipal()).thenReturn(userDetails);
             when(authenticationManager.authenticate(any())).thenReturn(authentication);
+
             when(jwtService.generateToken(1L, "testuser", "USER")).thenReturn("email-login-token");
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+            // FIX: AuthService.login uses findActiveById()
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
+
             when(userMapper.toUserResponse(testUser)).thenReturn(testUserResponse);
 
             AuthResponse response = authService.login(validLoginRequest);

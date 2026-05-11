@@ -57,7 +57,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-001: Should return user when found")
         void shouldReturnUser() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
 
             User result = userService.getById(1L);
 
@@ -67,7 +67,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-002: Should throw when user not found")
         void shouldThrowWhenNotFound() {
-            when(userRepository.findById(99L)).thenReturn(Optional.empty());
+            when(userRepository.findActiveById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.getById(99L))
                     .isInstanceOf(UserNotFoundException.class);
@@ -85,7 +85,8 @@ class UserServiceTest {
             deletedUser.setId(2L);
             deletedUser.setDeletedAt(Instant.now());
 
-            when(userRepository.findAll()).thenReturn(List.of(testUser, deletedUser));
+            // UserService.findAll() calls findAllActive(), not findAll()
+            when(userRepository.findAllActive()).thenReturn(List.of(testUser));
 
             List<User> result = userService.findAll();
 
@@ -125,7 +126,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-006: Should update status to uppercase")
         void shouldUpdateStatus() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(userRepository.save(any(User.class))).thenReturn(testUser);
 
             userService.updateStatus(1L, "banned");
@@ -142,7 +143,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-007: Should update role to ADMIN")
         void shouldUpdateToAdmin() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(userRepository.save(any(User.class))).thenReturn(testUser);
 
             userService.updateRole(1L, "ADMIN");
@@ -153,7 +154,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-008: Should strip ROLE_ prefix")
         void shouldStripPrefix() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(userRepository.save(any(User.class))).thenReturn(testUser);
 
             userService.updateRole(1L, "ROLE_ADMIN");
@@ -179,9 +180,9 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-011: Should not save if same role")
         void shouldSkipIfSameRole() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
 
-            User result = userService.updateRole(1L, "USER");
+            userService.updateRole(1L, "USER");
 
             verify(userRepository, never()).save(any());
         }
@@ -190,7 +191,7 @@ class UserServiceTest {
         @DisplayName("TC-USR-012: Should reject role change for deleted user")
         void shouldRejectForDeletedUser() {
             testUser.setDeletedAt(Instant.now());
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
 
             assertThatThrownBy(() -> userService.updateRole(1L, "ADMIN"))
                     .isInstanceOf(IllegalStateException.class)
@@ -205,7 +206,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-013: Should change password successfully")
         void shouldChangePassword() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(passwordEncoder.matches("oldpass", "$2a$12$hashedpassword")).thenReturn(true);
             when(passwordEncoder.matches("newpass123", "$2a$12$hashedpassword")).thenReturn(false);
             when(passwordEncoder.encode("newpass123")).thenReturn("$2a$12$newhash");
@@ -223,7 +224,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-014: Should reject wrong current password")
         void shouldRejectWrongPassword() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(passwordEncoder.matches("wrongpass", "$2a$12$hashedpassword")).thenReturn(false);
 
             ChangePasswordRequest req = new ChangePasswordRequest();
@@ -238,7 +239,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-015: Should reject same password")
         void shouldRejectSamePassword() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
             when(passwordEncoder.matches("samepass", "$2a$12$hashedpassword")).thenReturn(true);
 
             ChangePasswordRequest req = new ChangePasswordRequest();
@@ -253,7 +254,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-016: Should reject blank new password")
         void shouldRejectBlankNewPassword() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
 
             ChangePasswordRequest req = new ChangePasswordRequest();
             req.setCurrentPassword("oldpass");
@@ -272,7 +273,7 @@ class UserServiceTest {
         @Test
         @DisplayName("TC-USR-017: Should soft delete user")
         void shouldSoftDelete() {
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.findActiveById(1L)).thenReturn(Optional.of(testUser));
 
             userService.softDelete(1L);
 
