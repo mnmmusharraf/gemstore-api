@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gemstore.backend.dtos.auth.LoginRequest;
 import com.gemstore.backend.dtos.auth.RegisterUserRequest;
 import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.EmailVerificationOtpRepository;
 import com.gemstore.backend.repositories.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,11 +28,13 @@ class AuthControllerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private EmailVerificationOtpRepository otpRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+        otpRepository.deleteAll(); // ✅ Added to prevent foreign key constraint violation
         userRepository.deleteAll();
     }
 

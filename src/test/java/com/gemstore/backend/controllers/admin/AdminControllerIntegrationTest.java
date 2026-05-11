@@ -2,9 +2,10 @@ package com.gemstore.backend.controllers.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.EmailVerificationOtpRepository;
 import com.gemstore.backend.repositories.user.UserRepository;
 import com.gemstore.backend.services.auth.JWTService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print; // ✅ Added print import
+
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS) //
 class AdminControllerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private EmailVerificationOtpRepository otpRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTService jwtService;
@@ -36,6 +42,7 @@ class AdminControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        otpRepository.deleteAll();
         userRepository.deleteAll();
 
         // Create admin user
@@ -83,6 +90,7 @@ class AdminControllerIntegrationTest {
     void updateStatus_asAdmin_returnsOk() throws Exception {
         mockMvc.perform(patch("/api/admin/users/{id}/status/{status}", targetUser.getId(), "SUSPENDED")
                         .header("Authorization", "Bearer " + adminToken))
+                .andDo(print()) // ✅ Added print() here to see the 409 error body
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("User status updated to SUSPENDED"))

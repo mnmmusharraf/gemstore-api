@@ -11,6 +11,7 @@ import com.gemstore.backend.entities.report.ReportReason;
 import com.gemstore.backend.entities.report.ReportStatus;
 import com.gemstore.backend.entities.report.ReportType;
 import com.gemstore.backend.entities.user.User;
+import com.gemstore.backend.repositories.user.EmailVerificationOtpRepository;
 import com.gemstore.backend.repositories.listing.ListingRepository;
 import com.gemstore.backend.repositories.listing.ListingViewRepository;
 import com.gemstore.backend.repositories.listing.lookup.GemstoneTypeRepository;
@@ -40,6 +41,7 @@ class ReportControllerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private EmailVerificationOtpRepository otpRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ListingRepository listingRepository;
     @Autowired private ListingViewRepository listingViewRepository; // ✅ added
@@ -61,6 +63,7 @@ class ReportControllerIntegrationTest {
         reportRepository.deleteAll();
         listingViewRepository.deleteAll(); // ✅ added (must be before listingRepository.deleteAll())
         listingRepository.deleteAll();
+        otpRepository.deleteAll(); // ✅ Added to prevent foreign key constraint violation
         userRepository.deleteAll();
         gemstoneTypeRepository.deleteAll();
 
