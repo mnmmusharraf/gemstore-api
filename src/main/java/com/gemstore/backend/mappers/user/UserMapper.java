@@ -50,6 +50,8 @@ public interface UserMapper {
     @Mapping(target = "postsCount", source = "postsCount")
     @Mapping(target = "followersCount", source = "followersCount")
     @Mapping(target = "followingCount", source = "followingCount")
+
+    @Mapping(target = "dateOfBirth" , source = "dateOfBirth")
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "id", source = "id")
@@ -90,6 +92,7 @@ public interface UserMapper {
     @Mapping(target = "mfaEnabled", constant = "false")
     @Mapping(target = "timezone", ignore = true)
     @Mapping(target = "locale", ignore = true)
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     User toEntity(RegisterUserRequest request);
 
     /* ===================== Partial Profile Update ===================== */
@@ -109,6 +112,8 @@ public interface UserMapper {
     @Mapping(target = "website", source = "website")
     @Mapping(target = "bio", source = "bio")
     @Mapping(target = "privateProfile", source = "privateProfile")
+
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
 
     void updateUserFromProfile(UpdateProfileRequest request, @MappingTarget User user);
 
@@ -151,6 +156,7 @@ public interface UserMapper {
     @Mapping(target = "mfaEnabled", constant = "false")
     @Mapping(target = "timezone", ignore = true)
     @Mapping(target = "locale", ignore = true)
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     User toEntityWithEncoding(RegisterUserRequest request,
                               @Context PasswordEncoderContext passwordEncoderContext);
 

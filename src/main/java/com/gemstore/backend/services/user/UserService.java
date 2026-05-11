@@ -31,10 +31,7 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .filter(u -> u.getDeletedAt() == null)
-                .toList();
+        return userRepository.findAllActive();
     }
 
     /**
@@ -45,7 +42,7 @@ public class UserService {
     }
 
     public User getById(Long id) {
-        return userRepository.findById(id)
+        return userRepository.findActiveById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 

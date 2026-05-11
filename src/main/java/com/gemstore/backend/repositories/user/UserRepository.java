@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository. JpaRepository;
 import org. springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -44,4 +45,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.provider = :provider AND u.providerId = :providerId AND u.deletedAt IS NULL")
     Optional<User> findActiveByProviderAndProviderId(String provider, String providerId);
+
+    @Query("""
+    SELECT u FROM User u
+    WHERE u.id = :id
+    AND u.deletedAt IS NULL
+""")
+    Optional<User> findActiveById(Long id);
+
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    List<User> findAllActive();
 }

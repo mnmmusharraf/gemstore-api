@@ -2,8 +2,11 @@ package com.gemstore.backend.dtos.user;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,4 +38,7 @@ public class UpdateProfileRequest {
     private String bio;
 
     private Boolean privateProfile;
+
+    @Past(message = "Date of birth must be in the past")
+    private LocalDate dateOfBirth;
 }

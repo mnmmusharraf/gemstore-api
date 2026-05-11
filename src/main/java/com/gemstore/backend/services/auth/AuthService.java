@@ -25,46 +25,56 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
+    private final EmailVerificationOtpService otpService;
 
-public AuthResponse register(RegisterUserRequest req) {
+    public AuthResponse register(RegisterUserRequest req) {
 
-    String emailNorm = req.getEmail().trim().toLowerCase();
-    String usernameNorm = req.getUsername().trim();
-    String displayNameNorm = req.getDisplayName().trim();
+        String emailNorm = req.getEmail().trim().toLowerCase();
+        String usernameNorm = req.getUsername().trim();
+        String displayNameNorm = req.getDisplayName().trim();
 
-    if (userRepository.existsByEmailIgnoreCase(emailNorm)) {
-        throw new IllegalStateException("Email already used");
+        if (userRepository.existsByEmailIgnoreCase(emailNorm)) {
+            throw new IllegalStateException("Email already used");
+        }
+
+        if (userRepository.existsByUsernameIgnoreCase(usernameNorm)) {
+            throw new IllegalStateException("Username already taken");
+        }
+
+        User user = userMapper.toEntity(req);
+
+        user.setEmail(emailNorm);
+        user.setUsername(usernameNorm);
+        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        user.setDisplayName(displayNameNorm);
+
+        if (user.getRole() == null) {
+            user.setRole("USER");
+        }
+
+        // Save user first
+        user = userRepository.save(user);
+
+        // Generate and send OTP email
+        otpService.generateAndSendOtp(user);
+
+        // Generate JWT
+        String token = jwtService.generateToken(
+                user.getId(),
+                user.getUsername(),
+                user.getRole()
+        );
+
+        log.info("[AuthService] Registration token generated for userId={}",
+                user.getId());
+
+        return AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .user(userMapper.toUserResponse(user))
+                .newUser(true)
+                .build();
     }
-    if (userRepository.existsByUsernameIgnoreCase(usernameNorm)) {
-        throw new IllegalStateException("Username already taken");
-    }
-
-    User user = userMapper.toEntity(req);
-    user.setEmail(emailNorm);
-    user.setUsername(usernameNorm);
-    user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
-    user.setDisplayName(displayNameNorm);
-
-    if (user.getRole() == null) user.setRole("USER");
-
-    user = userRepository.save(user);
-
-    //  generate token with uid + role
-    String token = jwtService.generateToken(
-            user.getId(),
-            user.getUsername(),
-            user.getRole()
-    );
-
-    log.info("[AuthService] Registration token generated for userId={}", user.getId());
-
-    return AuthResponse.builder()
-            .token(token)
-            .tokenType("Bearer")
-            .user(userMapper.toUserResponse(user))
-            .newUser(true)
-            .build();
-}
 
 
     public AuthResponse login(LoginRequest request) {
@@ -104,7 +114,7 @@ public AuthResponse register(RegisterUserRequest req) {
                 .token(token)
                 .tokenType("Bearer")
                 .user(userMapper.toUserResponse(
-                        userRepository.findById(userDetails.getId()).orElseThrow()
+                        userRepository.findActiveById(userDetails.getId()).orElseThrow()
                 ))
                 .newUser(false)
                 .build();

@@ -12,6 +12,7 @@ import com.gemstore.backend.entities.report.ReportStatus;
 import com.gemstore.backend.entities.report.ReportType;
 import com.gemstore.backend.entities.user.User;
 import com.gemstore.backend.repositories.listing.ListingRepository;
+import com.gemstore.backend.repositories.listing.ListingViewRepository;
 import com.gemstore.backend.repositories.listing.lookup.GemstoneTypeRepository;
 import com.gemstore.backend.repositories.report.ReportRepository;
 import com.gemstore.backend.repositories.user.UserRepository;
@@ -41,6 +42,7 @@ class ReportControllerIntegrationTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
     @Autowired private ListingRepository listingRepository;
+    @Autowired private ListingViewRepository listingViewRepository; // ✅ added
     @Autowired private GemstoneTypeRepository gemstoneTypeRepository;
     @Autowired private ReportRepository reportRepository;
     @Autowired private PasswordEncoder passwordEncoder;
@@ -57,6 +59,7 @@ class ReportControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         reportRepository.deleteAll();
+        listingViewRepository.deleteAll(); // ✅ added (must be before listingRepository.deleteAll())
         listingRepository.deleteAll();
         userRepository.deleteAll();
         gemstoneTypeRepository.deleteAll();
